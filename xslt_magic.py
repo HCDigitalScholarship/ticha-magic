@@ -2,6 +2,8 @@ import sys
 import os
 from lxml import etree, sax
 
+XSLT_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'transform.xslt')
+
 class TEIPager(sax.ElementTreeContentHandler):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -80,7 +82,7 @@ def xml_to_html(xml_data):
 def xml_to_html_root(xml_data):
     """Convert the XML data as a string to HTML as an lxml Element."""
     xml_root = preprocess_xml(xml_data)
-    xslt_root = etree.parse('transform.xslt').getroot()
+    xslt_root = etree.parse(XSLT_PATH).getroot()
     transform = etree.XSLT(xslt_root)
     return transform(xml_root)
 
