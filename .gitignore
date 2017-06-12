@@ -2,3 +2,5 @@
 levanto/*.html
 __pycache__/
 *.swp
+*_outline.html
+levanto.xml

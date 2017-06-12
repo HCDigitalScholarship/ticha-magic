@@ -48,14 +48,13 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='XML to HTML utilities')
     parser.add_argument('output', choices=choice_dispatch.keys(),
                         help='format of output ("html" uses XSLT, while "magic" is pure Python)')
-    parser.add_argument('--in', dest='in_', default='../levanto/levanto.xml', 
-                        help='file to read XML from')
-    parser.add_argument('--out', default='', help='file to write to')
+    parser.add_argument('infile', help='file to read XML from')
+    parser.add_argument('outfile', nargs='?', default='', help='file to write to')
     args = parser.parse_args()
     transform_f, file_ext = choice_dispatch[args.output]
-    with open(args.in_, 'r', encoding='utf-8') as ifsock:
+    with open(args.infile, 'r', encoding='utf-8') as ifsock:
         data = transform_f(ifsock.read())
-    name = os.path.splitext(args.in_)[0]
-    out_path = args.out or (name + file_ext)
+    name = os.path.splitext(args.infile)[0]
+    out_path = args.outfile or (name + file_ext)
     with open(out_path, 'w', encoding='utf-8') as ofsock:
         ofsock.write(data)
