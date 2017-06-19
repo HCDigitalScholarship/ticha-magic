@@ -4,30 +4,53 @@ from lxml import etree, sax
 
 XSLT_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'transform.xslt')
 
-class TEIPager(sax.ElementTreeContentHandler):
+class AugmentedElementTreeContentHandler(sax.ElementTreeContentHandler):
+    """Augment the lxml implementation to support better error messages."""
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.in_text = False
+        self.real_tag_stack = []
+
+    def startElementNS(self, ns_name, qname, attributes=None):
+        self.real_tag_stack.append(qname)
+        super().startElementNS(ns_name, qname, attributes)
+
+    def endElementNS(self, ns_name, qname):
+        try:
+            super().endElementNS(ns_name, qname)
+            self.real_tag_stack.pop()
+        except sax.SaxError as e:
+            print('Tried to close ' + qname, end='')
+            if self.real_tag_stack:
+                print(', but last opened tag was ' + self.real_tag_stack[-1])
+            else:
+                print(', but no tags have been opened')
+            raise e
+
+
+class TEIPager(AugmentedElementTreeContentHandler):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self.tag_stack = []
         self.page = 0
         self.line = 1
 
     def startElementNS(self, ns_name, qname, attributes=None):
-        if qname == 'text':
-            self.in_text = True
-            super().startElementNS(ns_name, qname, attributes)
-            super().startElementNS((None, 'div'), 'div', {(None, 'class'):'printed_text_page',
-                                                          (None, 'n'):str(self.page),})
-        elif qname == 'pb':
-            self.handlePageBreak()
-        elif qname == 'cb':
+        #print(qname)
+        if tag_eq(qname, 'pb'):
+            if attributes.get((None, 'type')) != 'pdf':
+                self.handlePageBreak()
+        elif tag_eq(qname, 'cb'):
             n = attributes.get((None, 'n'))
             self.handleColumnBreak(n)
+        elif tag_eq(qname, 'body'):
+            super().startElementNS((None, 'div'), 'div')
+            super().startElementNS((None, 'div'), 'div', {(None, 'class'):'page',
+                                                          (None, 'n'):str(self.page),})
         else:
-            if qname == 'lb':
+            if tag_eq(qname, 'br'):
                 self.line += 1
-            if self.in_text:
-                self.tag_stack.append( (ns_name, qname, attributes) )
+            self.tag_stack.append( (ns_name, qname, attributes) )
             super().startElementNS(ns_name, qname, attributes)
 
     def handlePageBreak(self):
@@ -35,7 +58,7 @@ class TEIPager(sax.ElementTreeContentHandler):
         self.page += 1
         self.closeAllTags()
         super().endElementNS((None, 'div'), 'div')
-        super().startElementNS((None, 'div'), 'div', {(None, 'class'):'printed_text_page',
+        super().startElementNS((None, 'div'), 'div', {(None, 'class'):'page',
                                                       (None, 'n'):str(self.page),})
         self.reopenAllTags()
 
@@ -53,13 +76,12 @@ class TEIPager(sax.ElementTreeContentHandler):
             self.startElementNS((None, 'div'), 'div', {(None, 'class'):'col-xs-6'})
 
     def endElementNS(self, ns_name, qname):
-        if qname == 'text':
-            self.in_text = False
+        # ignore self-closing <pb> and <cb> tags; they were already handled by startElementNS
+        if tag_eq(qname, 'body'):
             super().endElementNS((None, 'div'), 'div')
-            super().endElementNS(ns_name, qname)
-        elif qname != 'pb' and qname != 'cb':
-            if self.in_text:
-                self.tag_stack.pop()
+            super().endElementNS((None, 'div'), 'div')
+        elif not tag_eq(qname, 'pb') and not tag_eq(qname, 'cb'):
+            self.tag_stack.pop()
             try:
                 super().endElementNS(ns_name, qname)
             except sax.SaxError as e:
@@ -74,22 +96,35 @@ class TEIPager(sax.ElementTreeContentHandler):
         for ns_name, qname, attributes in self.tag_stack:
             super().startElementNS(ns_name, qname, attributes)
 
-def xml_to_html(xml_data):
-    """Convert the XML data as a string to HTML as a string."""
-    html_root = xml_to_html_root(xml_data)
-    return etree.tostring(html_root, method='xml', encoding='unicode')
 
-def xml_to_html_root(xml_data):
-    """Convert the XML data as a string to HTML as an lxml Element."""
-    xml_root = preprocess_xml(xml_data)
-    xslt_root = etree.parse(XSLT_PATH).getroot()
-    transform = etree.XSLT(xslt_root)
-    return transform(xml_root)
+def xml_to_html(xml_root):
+    return paginate(preprocess(xml_root))
 
-def preprocess_xml(xml_data):
-    """Preprocess the XML data to an lxml Element."""
+def xml_to_html_from_str(data):
+    root = xml_from_string(data)
+    return string_from_xml(paginate(preprocess(root)))
+
+def preprocess(root):
+    xslt_transform = etree.XSLT(etree.parse(XSLT_PATH).getroot())
+    return xslt_transform(root)
+
+def preprocess_from_str(data):
+    root = xml_from_string(data)
+    return string_from_xml(preprocess(root))
+
+def paginate(root):
     # I do not understand why it is necessary to cast to bytes here
-    xml_root = etree.XML(bytes(xml_data, encoding='utf-8'))
     handler = TEIPager()
-    sax.saxify(xml_root, handler)
+    sax.saxify(root, handler)
     return handler.etree
+
+
+def tag_eq(tag_in_document, tag_to_check):
+    """Compare equality of tags ignoring namespaces. Not that this is not commutative."""
+    return tag_in_document == tag_to_check or tag_in_document.endswith(':' + tag_to_check)
+
+def xml_from_string(data, encoding='utf-8'):
+    return etree.XML(bytes(data, encoding=encoding))
+
+def string_from_xml(root, method='xml', encoding='unicode'):
+    return etree.tostring(root, method=method, encoding=encoding)

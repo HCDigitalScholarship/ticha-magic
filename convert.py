@@ -30,12 +30,9 @@ TEMPLATE = """\
 </html>
 """
 def preview(data):
-    html = xslt_magic.xml_to_html(data)
+    html = xslt_magic.xml_to_html_from_str(data)
     return TEMPLATE.format(html)
 
-def preprocess_xml_to_string(xml_data):
-    html_root = xslt_magic.preprocess_xml(xml_data)
-    return etree.tostring(html_root, method='xml', encoding='unicode')
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='XML to HTML utilities')
@@ -43,17 +40,17 @@ if __name__ == '__main__':
     parser.add_argument('outfile', nargs='?', default='', help='file to write to')
     group = parser.add_mutually_exclusive_group()
     group.add_argument('--magic', action='store_true', help='use the Python ticha_magic parser')
-    group.add_argument('--paginate', action='store_true', help='only paginate the XML')
+    group.add_argument('--preprocess', action='store_true',help='apply the XSLT without paginating')
     group.add_argument('--preview', action='store_true', help='generate an HTML preview')
     group.add_argument('--outline', action='store_true', help='generate an HTML outline')
     args = parser.parse_args()
     infile_name = os.path.splitext(args.infile)[0]
     if args.magic:
-        transform_f = ticha_magic.xml_to_html
+        transform_f = ticha_magic.xml_to_html_from_str
         outfile = args.outfile or infile_name + '.html'
-    elif args.paginate:
-        transform_f = preprocess_xml_to_string
-        outfile = args.outfile or infile_name + '_paginated.xml'
+    elif args.preprocess:
+        transform_f = xslt_magic.preprocess_from_str
+        outfile = args.outfile or infile_name + '_preprocessed.xml'
     elif args.preview:
         transform_f = preview
         outfile = args.outfile or infile_name + '_preview.html'
@@ -61,7 +58,7 @@ if __name__ == '__main__':
         transform_f = ticha_outline.xml_to_outline
         outfile = args.outfile or infile_name + '_outline.html'
     else:
-        transform_f = xslt_magic.xml_to_html
+        transform_f = xslt_magic.xml_to_html_from_str
         outfile = args.outfile or infile_name + '.html'
     with open(args.infile, 'r', encoding='utf-8') as ifsock:
         data = transform_f(ifsock.read())

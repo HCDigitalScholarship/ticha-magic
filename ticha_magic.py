@@ -230,6 +230,6 @@ def xml_to_html_target(data, spellchoice='orig', abbrchoice='abbr'):
     parser.close()
     return target
 
-def xml_to_html(data, spellchoice='orig', abbrchoice='abbr'):
+def xml_to_html_from_str(data, spellchoice='orig', abbrchoice='abbr'):
     """Converts the XML string to a corresponding HTML string."""
     return str(xml_to_html_target(data, spellchoice, abbrchoice))

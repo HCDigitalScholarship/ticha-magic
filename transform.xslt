@@ -1,12 +1,17 @@
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
   <xsl:output method="xhtml"/>
 
+  <xsl:template match="/">
+    <body>
+      <xsl:apply-templates/>
+    </body>
+  </xsl:template>
+
   <!-- only transform inside the <text> node -->
   <xsl:template match="text">
-    <div>
-      <xsl:apply-templates/>
-    </div>
+    <xsl:apply-templates/>
   </xsl:template>
+  <xsl:template match="teiHeader"></xsl:template>
 
   <!-- transform <head> -->
   <xsl:template match="head">
@@ -16,6 +21,16 @@
   </xsl:template>
   <!-- don't transform <head type='outline'> -->
   <xsl:template match="head[@type='outline']"></xsl:template>
+
+  <xsl:template match="front">
+    <xsl:apply-templates/>
+  </xsl:template>
+  <xsl:template match="choice">
+    <xsl:apply-templates/>
+  </xsl:template>
+  <xsl:template match="orig">
+    <xsl:apply-templates/>
+  </xsl:template>
 
   <!-- transform (preserve) <div> -->
   <xsl:template match="div[not(@xml:id)]">
@@ -67,5 +82,17 @@
     <span class="italic">
       <xsl:apply-templates/>
     </span>
+  </xsl:template>
+
+  <!-- preserve line and column breaks for the postprocessor -->
+  <xsl:template match="pb">
+    <xsl:copy>
+      <xsl:copy-of select="@*"/>
+    </xsl:copy>
+  </xsl:template>
+  <xsl:template match="cb">
+    <xsl:copy>
+      <xsl:copy-of select="@*"/>
+    </xsl:copy>
   </xsl:template>
 </xsl:stylesheet>
