@@ -38,23 +38,32 @@ def preprocess_xml_to_string(xml_data):
     return etree.tostring(html_root, method='xml', encoding='unicode')
 
 if __name__ == '__main__':
-    choice_dispatch = {
-        'html':(xslt_magic.xml_to_html, '.html'),
-        'outline':(ticha_outline.xml_to_outline, '_outline.html'),
-        'preview':(preview, '_preview.html'),
-        'magic':(ticha_magic.xml_to_html, '.html'),
-        'preprocessed':(preprocess_xml_to_string, '_preprocessed.xml'),
-    }
     parser = argparse.ArgumentParser(description='XML to HTML utilities')
-    parser.add_argument('output', choices=choice_dispatch.keys(),
-                        help='format of output ("html" uses XSLT, while "magic" is pure Python)')
     parser.add_argument('infile', help='file to read XML from')
     parser.add_argument('outfile', nargs='?', default='', help='file to write to')
+    group = parser.add_mutually_exclusive_group()
+    group.add_argument('--magic', action='store_true', help='use the Python ticha_magic parser')
+    group.add_argument('--paginate', action='store_true', help='only paginate the XML')
+    group.add_argument('--preview', action='store_true', help='generate an HTML preview')
+    group.add_argument('--outline', action='store_true', help='generate an HTML outline')
     args = parser.parse_args()
-    transform_f, file_ext = choice_dispatch[args.output]
+    infile_name = os.path.splitext(args.infile)[0]
+    if args.magic:
+        transform_f = ticha_magic.xml_to_html
+        outfile = args.outfile or infile_name + '.html'
+    elif args.paginate:
+        transform_f = preprocess_xml_to_string
+        outfile = args.outfile or infile_name + '_paginated.xml'
+    elif args.preview:
+        transform_f = preview
+        outfile = args.outfile or infile_name + '_preview.html'
+    elif args.outline:
+        transform_f = ticha_outline.xml_to_outline
+        outfile = args.outfile or infile_name + '_outline.html'
+    else:
+        transform_f = xslt_magic.xml_to_html
+        outfile = args.outfile or infile_name + '.html'
     with open(args.infile, 'r', encoding='utf-8') as ifsock:
         data = transform_f(ifsock.read())
-    name = os.path.splitext(args.infile)[0]
-    out_path = args.outfile or (name + file_ext)
-    with open(out_path, 'w', encoding='utf-8') as ofsock:
+    with open(outfile, 'w', encoding='utf-8') as ofsock:
         ofsock.write(data)
