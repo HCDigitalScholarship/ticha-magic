@@ -97,22 +97,22 @@ class TEIPager(AugmentedElementTreeContentHandler):
             super().startElementNS(ns_name, qname, attributes)
 
 
-def xml_to_html(xml_root):
-    return paginate(preprocess(xml_root))
+def xml_to_html(xml_root, *, spellchoice, abbrchoice):
+    """Convert the TEI-encoded XML document to an HTML document."""
+    return paginate(preprocess(xml_root, spellchoice=spellchoice, abbrchoice=abbrchoice))
 
-def xml_to_html_from_str(data):
-    root = xml_from_string(data)
-    return string_from_xml(paginate(preprocess(root)))
-
-def preprocess(root):
+def preprocess(root, *, spellchoice, abbrchoice):
+    """Apply the XSLT stylesheet to the TEI-encoded XML document, but do not paginate."""
     xslt_transform = etree.XSLT(etree.parse(XSLT_PATH).getroot())
-    return xslt_transform(root)
-
-def preprocess_from_str(data):
-    root = xml_from_string(data)
-    return string_from_xml(preprocess(root))
+    spellchoice = etree.XSLT.strparam(spellchoice)
+    abbrchoice = etree.XSLT.strparam(abbrchoice)
+    return xslt_transform(root, spellchoice=spellchoice, abbrchoice=abbrchoice)
 
 def paginate(root):
+    """Paginate the TEI-encoded XML document. This entails removing all <pb/> elements and adding
+       <div class="page">...</div> elements to wrap each page. This function should be called
+       after preprocessing.
+    """
     # I do not understand why it is necessary to cast to bytes here
     handler = TEIPager()
     sax.saxify(root, handler)
@@ -120,11 +120,5 @@ def paginate(root):
 
 
 def tag_eq(tag_in_document, tag_to_check):
-    """Compare equality of tags ignoring namespaces. Not that this is not commutative."""
+    """Compare equality of tags ignoring namespaces. Note that this is not commutative."""
     return tag_in_document == tag_to_check or tag_in_document.endswith(':' + tag_to_check)
-
-def xml_from_string(data, encoding='utf-8'):
-    return etree.XML(bytes(data, encoding=encoding))
-
-def string_from_xml(root, method='xml', encoding='unicode'):
-    return etree.tostring(root, method=method, encoding=encoding)

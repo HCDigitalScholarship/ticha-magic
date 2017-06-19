@@ -1,5 +1,7 @@
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
   <xsl:output method="xhtml"/>
+  <xsl:param name="spellchoice" select="'orig'"/>
+  <xsl:param name="abbrchoice" select="'abbr'"/>
 
   <xsl:template match="/">
     <body>
@@ -25,11 +27,35 @@
   <xsl:template match="front">
     <xsl:apply-templates/>
   </xsl:template>
+
+  <!-- handle <choice> elements with the $spellchoice and $abbrchoice parameters -->
   <xsl:template match="choice">
     <xsl:apply-templates/>
   </xsl:template>
   <xsl:template match="orig">
-    <xsl:apply-templates/>
+    <xsl:if test="$spellchoice = 'orig'">
+      <xsl:apply-templates/>
+    </xsl:if>
+  </xsl:template>
+  <xsl:template match="reg[@type='spacing']">
+    <xsl:if test="$spellchoice = 'reg-spacing'">
+      <xsl:apply-templates/>
+    </xsl:if>
+  </xsl:template>
+  <xsl:template match="reg[@type='spanish']">
+    <xsl:if test="$spellchoice = 'reg-spanish'">
+      <xsl:apply-templates/>
+    </xsl:if>
+  </xsl:template>
+  <xsl:template match="abbr">
+    <xsl:if test="$abbrchoice = 'abbr'">
+      <xsl:apply-templates/>
+    </xsl:if>
+  </xsl:template>
+  <xsl:template match="expan">
+    <xsl:if test="$abbrchoice = 'expan'">
+      <xsl:apply-templates/>
+    </xsl:if>
   </xsl:template>
 
   <!-- transform (preserve) <div> -->
