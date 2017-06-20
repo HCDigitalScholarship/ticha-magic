@@ -1,7 +1,5 @@
 *.DS_Store
-levanto/*.html
+*.html
+*.xml
 __pycache__/
 *.swp
-*_outline.html
-levanto.xml
-arte.xml

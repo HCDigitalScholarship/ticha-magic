@@ -120,8 +120,9 @@ def xml_to_html(xml_root, **kwargs):
 def preprocess(root, **kwargs):
     """Apply the XSLT stylesheet to the TEI-encoded XML document, but do not paginate."""
     xslt_transform = etree.XSLT(etree.parse(XSLT_PATH).getroot())
-    spellchoice = etree.XSLT.strparam(spellchoice)
-    abbrchoice = etree.XSLT.strparam(abbrchoice)
+    for key, val in kwargs.items():
+        if isinstance(val, str):
+            kwargs[key] = etree.XSLT.strparam(val)
     return xslt_transform(root, **kwargs)
 
 def paginate(root):

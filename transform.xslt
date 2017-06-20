@@ -2,6 +2,7 @@
   <xsl:output method="xhtml"/>
   <xsl:param name="spellchoice" select="'orig'"/>
   <xsl:param name="abbrchoice" select="'abbr'"/>
+  <xsl:param name="textname" select="''"/>
 
   <xsl:template match="/">
     <body>
@@ -104,10 +105,29 @@
   </xsl:template>
 
   <!-- transform <foreign> -->
-  <xsl:template match="foreign[@rend='italic']|foreign[@rend='italics']">
-    <span class="italic">
+  <xsl:template match="foreign">
+    <xsl:if test="$textname = 'arte'">
+      <mark class="trigger">
+        <xsl:apply-templates/>
+      </mark>
+    </xsl:if>
+    <xsl:if test="$textname != 'arte'">
       <xsl:apply-templates/>
-    </span>
+    </xsl:if>
+  </xsl:template>
+  <xsl:template match="foreign[@rend='italic']|foreign[@rend='italics']">
+    <xsl:if test="$textname = 'arte'">
+      <mark class="trigger">
+        <span class="italic">
+          <xsl:apply-templates/>
+        </span>
+      </mark>
+    </xsl:if>
+    <xsl:if test="$textname != 'arte'">
+      <span class="italic">
+        <xsl:apply-templates/>
+      </span>
+    </xsl:if>
   </xsl:template>
 
   <!-- preserve line and column breaks for the postprocessor -->
