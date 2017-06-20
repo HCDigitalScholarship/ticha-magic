@@ -1,7 +1,8 @@
+#!/usr/bin/env python3
 """Generate an HTML outline from a TEI-encoded XML document."""
 import xml.etree.ElementTree as ET
-import sys
 import os
+import argparse
 from collections import namedtuple
 
 def xml_to_outline(data):
@@ -81,3 +82,15 @@ class OutlineBuilder(ET.TreeBuilder):
             super().end('a')
             super().end('li')
             self.number = self.in_progress.number
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('infile', help='XML file to read from')
+    parser.add_argument('outfile', nargs='?', help='file to write outline to')
+    args = parser.parse_args()
+    outfile = args.outfile or (os.path.splitext(args.infile)[0] + '_outline.html')
+    with open(args.infile, 'r', encoding='utf-8') as ifsock:
+        data = xml_to_outline(ifsock.read())
+    with open(outfile, 'w', encoding='utf-8') as ofsock:
+        ofsock.write(data)

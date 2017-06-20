@@ -4,7 +4,6 @@ import os
 import functools
 from lxml import etree
 
-import ticha_outline
 import ticha_magic
 import xslt_magic
 
@@ -30,27 +29,22 @@ TEMPLATE = """\
   </body>
 </html>
 """
-def preview(data):
-    html = string_adapter(xslt_magic.xml_to_html)(data, spellchoice='orig', abbrchoice='abbr')
+def preview(data, *, spellchoice, abbrchoice):
+    html = tostring(xslt_magic.xml_to_html(fromstring(data), spellchoice=spellchoice, 
+                                                             abbrchoice=abbrchoice))
     return TEMPLATE.format(html)
 
-def string_adapter(f):
-    """Given a function that takes an lxml.Element object as its first argument and returns an
-       lxml.Element object, return a function that takes a string as its first argument and returns
-       a string.
-    """
-    def from_string(data):
-        return etree.XML(bytes(data, encoding='utf-8'))
-    def to_string(root):
-        return etree.tostring(root, method='xml', encoding='unicode')
-    return lambda data, *args, **kwargs: to_string(f(from_string(data), *args, **kwargs))
+def fromstring(data):
+    return etree.XML(bytes(data, encoding='utf-8'))
+def tostring(root):
+    return etree.tostring(root, method='xml', encoding='unicode')
 
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='XML to HTML utilities')
+    parser = argparse.ArgumentParser(description='convert TEI-encoded XML to HTML')
     parser.add_argument('infile', help='file to read XML from')
-    parser.add_argument('outfile', nargs='?', default='', help='file to write to')
+    parser.add_argument('outfile', nargs='?', help='file to write to')
     parser.add_argument('--spellchoice', choices=['orig', 'reg-spacing', 'reg-spanish'], 
                                          default='orig')
     parser.add_argument('--abbrchoice', choices=['abbr', 'expan'], default='abbr')
@@ -58,28 +52,24 @@ if __name__ == '__main__':
     group.add_argument('--magic', action='store_true', help='use the Python ticha_magic parser')
     group.add_argument('--preprocess', action='store_true',help='apply the XSLT without paginating')
     group.add_argument('--preview', action='store_true', help='generate an HTML preview')
-    group.add_argument('--outline', action='store_true', help='generate an HTML outline')
     args = parser.parse_args()
-    infile_name = os.path.splitext(args.infile)[0]
+    with open(args.infile, 'r', encoding='utf-8') as ifsock:
+        data = ifsock.read()
     # decide which transform function to use, and what outfile name to generate
+    infile_name = os.path.splitext(args.infile)[0]
+    kwargs = {'abbrchoice':args.abbrchoice, 'spellchoice':args.spellchoice}
     if args.magic:
-        transform_f = ticha_magic.xml_to_html_from_str
+        data = ticha_magic.xml_to_html_from_str(data, **kwargs)
         outfile = args.outfile or infile_name + '.html'
     elif args.preprocess:
-        transform_f = string_adapter(xslt_magic.preprocess)
+        data = tostring(xslt_magic.preprocess(fromstring(data), **kwargs))
         outfile = args.outfile or infile_name + '_preprocessed.xml'
     elif args.preview:
-        transform_f = preview
+        data = preview(data, **kwargs)
         outfile = args.outfile or infile_name + '_preview.html'
-    elif args.outline:
-        transform_f = ticha_outline.xml_to_outline
-        outfile = args.outfile or infile_name + '_outline.html'
     else:
-        kwargs = {'abbrchoice':args.abbrchoice, 'spellchoice':args.spellchoice}
-        transform_f = string_adapter(functools.partial(xslt_magic.xml_to_html, **kwargs))
+        data = tostring(xslt_magic.xml_to_html(fromstring(data), **kwargs))
         outfile = args.outfile or infile_name + '.html'
     # write everything to file
-    with open(args.infile, 'r', encoding='utf-8') as ifsock:
-        data = transform_f(ifsock.read())
     with open(outfile, 'w', encoding='utf-8') as ofsock:
         ofsock.write(data)
