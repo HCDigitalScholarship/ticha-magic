@@ -4,9 +4,9 @@
   <xsl:param name="abbrchoice" select="'abbr'"/>
   <xsl:param name="textname" select="''"/>
 
-  <xsl:template match="/">
+  <xsl:template match="/TEI">
     <body>
-      <xsl:apply-templates select=".//text"/>
+      <xsl:apply-templates/>
     </body>
   </xsl:template>
 
@@ -16,8 +16,6 @@
       <xsl:apply-templates/>
     </h4>
   </xsl:template>
-  <!-- don't transform <head type='outline'> -->
-  <xsl:template match="head[@type='outline']"></xsl:template>
 
   <!-- handle <choice> elements with the $spellchoice and $abbrchoice parameters -->
   <xsl:template match="orig">
@@ -32,6 +30,11 @@
   </xsl:template>
   <xsl:template match="reg[@type='spanish']">
     <xsl:if test="$spellchoice = 'reg-spanish'">
+      <xsl:apply-templates/>
+    </xsl:if>
+  </xsl:template>
+  <xsl:template match="reg">
+    <xsl:if test="$spellchoice != 'orig'">
       <xsl:apply-templates/>
     </xsl:if>
   </xsl:template>
@@ -111,7 +114,7 @@
   </xsl:template>
 
   <!-- preserve these -->
-  <xsl:template match="pb|cb|div">
+  <xsl:template match="pb|cb|div|del">
     <!-- courtesy of stackoverflow.com/questions/26999058/, copies the div attributes -->
     <xsl:copy>
       <xsl:copy-of select="@*"/>
@@ -124,9 +127,13 @@
     </xsl:copy>
   </xsl:template>
 
-  <!-- ignore these tags but copy their contents -->
-  <xsl:template match="pc|div[@xml:id]|i|fw|emph|u|hi|gap|text">
+  <!-- ignore these but copy their contents -->
+  <xsl:template match="pc|div[@xml:id]|i|fw|emph|u|hi|gap|text|choice|ref|front|body|back|g|c|add">
     <xsl:apply-templates/>
+  </xsl:template>
+
+  <!-- ignore these and their contents -->
+  <xsl:template match="teiHeader|head[@type='outline']">
   </xsl:template>
 
   <!-- catch unmatched nodes, courtesy of stackoverflow.com/questions/3360017/ -->
