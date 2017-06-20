@@ -31,18 +31,19 @@ TEMPLATE = """\
 </html>
 """
 def preview(data):
-    html = xslt_magic.xml_to_html_from_str(data)
+    html = string_adapter(xslt_magic.xml_to_html)(data, spellchoice='orig', abbrchoice='abbr')
     return TEMPLATE.format(html)
 
 def string_adapter(f):
-    """Given a function that takes and returns lxml.Element objects, return an equivalent
-       function that takes and returns strings.
+    """Given a function that takes an lxml.Element object as its first argument and returns an
+       lxml.Element object, return a function that takes a string as its first argument and returns
+       a string.
     """
     def from_string(data):
         return etree.XML(bytes(data, encoding='utf-8'))
     def to_string(root):
         return etree.tostring(root, method='xml', encoding='unicode')
-    return lambda data: to_string(f(from_string(data)))
+    return lambda data, *args, **kwargs: to_string(f(from_string(data), *args, **kwargs))
 
 
 
