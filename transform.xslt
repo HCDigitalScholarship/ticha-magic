@@ -6,15 +6,9 @@
 
   <xsl:template match="/">
     <body>
-      <xsl:apply-templates/>
+      <xsl:apply-templates select=".//text"/>
     </body>
   </xsl:template>
-
-  <!-- only transform inside the <text> node -->
-  <xsl:template match="text">
-    <xsl:apply-templates/>
-  </xsl:template>
-  <xsl:template match="teiHeader"></xsl:template>
 
   <!-- transform <head> -->
   <xsl:template match="head">
@@ -25,14 +19,7 @@
   <!-- don't transform <head type='outline'> -->
   <xsl:template match="head[@type='outline']"></xsl:template>
 
-  <xsl:template match="front">
-    <xsl:apply-templates/>
-  </xsl:template>
-
   <!-- handle <choice> elements with the $spellchoice and $abbrchoice parameters -->
-  <xsl:template match="choice">
-    <xsl:apply-templates/>
-  </xsl:template>
   <xsl:template match="orig">
     <xsl:if test="$spellchoice = 'orig'">
       <xsl:apply-templates/>
@@ -57,15 +44,6 @@
     <xsl:if test="$abbrchoice = 'expan'">
       <xsl:apply-templates/>
     </xsl:if>
-  </xsl:template>
-
-  <!-- transform (preserve) <div> -->
-  <xsl:template match="div[not(@xml:id)]">
-    <!-- courtesy of stackoverflow.com/questions/26999058/, copies the div attributes -->
-    <xsl:copy>
-      <xsl:copy-of select="@*"/>
-      <xsl:apply-templates/>
-    </xsl:copy>
   </xsl:template>
 
   <!-- transform <p> -->
@@ -106,16 +84,23 @@
 
   <!-- transform <foreign> -->
   <xsl:template match="foreign">
+    <xsl:if test="$textname != 'arte'">
+      <xsl:apply-templates/>
+    </xsl:if>
+    <!-- Arte-specific logic -->
     <xsl:if test="$textname = 'arte'">
       <mark class="trigger">
         <xsl:apply-templates/>
       </mark>
     </xsl:if>
-    <xsl:if test="$textname != 'arte'">
-      <xsl:apply-templates/>
-    </xsl:if>
   </xsl:template>
   <xsl:template match="foreign[@rend='italic']|foreign[@rend='italics']">
+    <xsl:if test="$textname != 'arte'">
+      <span class="italic">
+        <xsl:apply-templates/>
+      </span>
+    </xsl:if>
+    <!-- Arte-specific logic -->
     <xsl:if test="$textname = 'arte'">
       <mark class="trigger">
         <span class="italic">
@@ -123,22 +108,30 @@
         </span>
       </mark>
     </xsl:if>
-    <xsl:if test="$textname != 'arte'">
-      <span class="italic">
-        <xsl:apply-templates/>
-      </span>
-    </xsl:if>
   </xsl:template>
 
-  <!-- preserve line and column breaks for the postprocessor -->
-  <xsl:template match="pb">
+  <!-- preserve these -->
+  <xsl:template match="pb|cb|div">
+    <!-- courtesy of stackoverflow.com/questions/26999058/, copies the div attributes -->
     <xsl:copy>
       <xsl:copy-of select="@*"/>
+      <xsl:apply-templates/>
     </xsl:copy>
   </xsl:template>
   <xsl:template match="cb">
     <xsl:copy>
       <xsl:copy-of select="@*"/>
     </xsl:copy>
+  </xsl:template>
+
+  <!-- ignore these tags but copy their contents -->
+  <xsl:template match="pc|div[@xml:id]|i|fw|emph|u|hi|gap|text">
+    <xsl:apply-templates/>
+  </xsl:template>
+
+  <!-- catch unmatched nodes, courtesy of stackoverflow.com/questions/3360017/ -->
+  <xsl:template match="*">
+    <xsl:message>STYLESHEET WARNING: unmatched element <xsl:value-of select="name()"/></xsl:message>
+    <xsl:apply-templates/>
   </xsl:template>
 </xsl:stylesheet>

@@ -123,7 +123,9 @@ def preprocess(root, **kwargs):
     for key, val in kwargs.items():
         if isinstance(val, str):
             kwargs[key] = etree.XSLT.strparam(val)
-    return xslt_transform(root, **kwargs)
+    ret = xslt_transform(root, **kwargs)
+    print(xslt_transform.error_log)
+    return ret
 
 def paginate(root):
     """Paginate the TEI-encoded XML document. This entails removing all <pb/> elements and adding
@@ -367,7 +369,7 @@ _preview_template = """\
   </head>
   <body>
     <div class="container">
-      <div class="row text-center">
+      <div class="row text-left">
         <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
         </div>
         <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
