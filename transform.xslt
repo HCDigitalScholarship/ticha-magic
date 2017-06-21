@@ -128,7 +128,7 @@
   </xsl:template>
 
   <!-- ignore these but copy their contents -->
-  <xsl:template match="pc|div[@xml:id]|i|fw|emph|u|hi|gap|text|choice|ref|front|body|back|g|c|add">
+  <xsl:template match="pc|i|fw|emph|u|hi|gap|text|choice|ref|front|body|back|g|c|add">
     <xsl:apply-templates/>
   </xsl:template>
 

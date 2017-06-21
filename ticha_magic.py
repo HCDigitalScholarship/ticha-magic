@@ -15,7 +15,6 @@ import xml.etree.ElementTree as ET
 from lxml import etree, sax
 
 
-
 ### THE CURRENT CONVERSION PROGRAM, USING MOSTLY XSLT ###
 
 XSLT_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'transform.xslt')
@@ -45,14 +44,21 @@ class AugmentedElementTreeContentHandler(sax.ElementTreeContentHandler):
 
 
 class TEIPager(AugmentedElementTreeContentHandler):
+    namespace = 'http://www.w3.org/XML/1998/namespace'
+    # used on the tag stack to indicate a dummy element that should not be opened/closed
+    dummy_elem = ('', '', None)
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        # The tag stack is a stack of (ns_name, qname, attributes) tuples that represent the current
+        # path in the tree. Dummy tags (see cls.dummy_elem) may be pushed onto the stack. These
+        # should always be ignored.
         self.tag_stack = []
         self.page = 0
         self.line = 1
+        self.section = ''
 
     def startElementNS(self, ns_name, qname, attributes=None):
-        #print(qname)
         if tag_eq(qname, 'pb'):
             if attributes.get((None, 'type')) != 'pdf':
                 self.handlePageBreak()
@@ -61,11 +67,20 @@ class TEIPager(AugmentedElementTreeContentHandler):
             self.handleColumnBreak(n)
         elif tag_eq(qname, 'body'):
             super().startElementNS((None, 'div'), 'div')
-            super().startElementNS((None, 'div'), 'div', {(None, 'class'):'page',
-                                                          (None, 'n'):str(self.page),})
+            attrs = {(None, 'class'): 'page', (None, 'n'): str(self.page), 
+                     (None, 'section'): self.section}
+            super().startElementNS((None, 'div'), 'div', attrs)
         else:
             if tag_eq(qname, 'br'):
                 self.line += 1
+            if tag_eq(qname, 'div'):
+                if attributes:
+                    new_section = attributes.get((self.namespace, 'id'))
+                    if new_section:
+                        # make 2.01 into 2.1
+                        self.section = new_section.replace('.0', '.')
+                        self.tag_stack.append(self.dummy_elem)
+                        return
             self.tag_stack.append( (ns_name, qname, attributes) )
             super().startElementNS(ns_name, qname, attributes)
 
@@ -74,8 +89,9 @@ class TEIPager(AugmentedElementTreeContentHandler):
         self.page += 1
         self.closeAllTags()
         super().endElementNS((None, 'div'), 'div')
-        super().startElementNS((None, 'div'), 'div', {(None, 'class'):'page',
-                                                      (None, 'n'):str(self.page),})
+        attrs = {(None, 'class'): 'page', (None, 'n'): str(self.page), 
+                 (None, 'section'): self.section}
+        super().startElementNS((None, 'div'), 'div', attrs)
         self.reopenAllTags()
 
     def handleColumnBreak(self, n):
@@ -97,20 +113,23 @@ class TEIPager(AugmentedElementTreeContentHandler):
             super().endElementNS((None, 'div'), 'div')
             super().endElementNS((None, 'div'), 'div')
         elif not tag_eq(qname, 'pb') and not tag_eq(qname, 'cb'):
-            self.tag_stack.pop()
-            try:
-                super().endElementNS(ns_name, qname)
-            except sax.SaxError as e:
-                print('Error on page {0.page}, line {0.line}'.format(self))
-                raise e
+            closes = self.tag_stack.pop()
+            if closes != self.dummy_elem:
+                try:
+                    super().endElementNS(ns_name, qname)
+                except sax.SaxError as e:
+                    print('Error on page {0.page}, line {0.line}'.format(self))
+                    raise e
 
     def closeAllTags(self):
         for ns_name, qname, _ in reversed(self.tag_stack):
-            super().endElementNS(ns_name, qname)
+            if ns_name or qname:
+                super().endElementNS(ns_name, qname)
 
     def reopenAllTags(self):
         for ns_name, qname, attributes in self.tag_stack:
-            super().startElementNS(ns_name, qname, attributes)
+            if ns_name or qname:
+                super().startElementNS(ns_name, qname, attributes)
 
 
 def xml_to_html(xml_root, **kwargs):
