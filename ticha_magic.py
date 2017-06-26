@@ -59,8 +59,8 @@ class TEIPager(AugmentedElementTreeContentHandler):
             self.handleColumnBreak(n)
         elif tag_eq(qname, 'body'):
             super().startElementNS((None, 'div'), 'div')
-            attrs = {(None, 'class'): 'page', (None, 'n'): str(self.page), 
-                     (None, 'section'): self.section}
+            attrs = {(None, 'class'): 'page', (None, 'data-n'): str(self.page),
+                     (None, 'data-section'): self.section}
             super().startElementNS((None, 'div'), 'div', attrs)
         else:
             if tag_eq(qname, 'br'):
@@ -81,8 +81,8 @@ class TEIPager(AugmentedElementTreeContentHandler):
         self.page += 1
         self.closeAllTags()
         super().endElementNS((None, 'div'), 'div')
-        attrs = {(None, 'class'): 'page', (None, 'n'): str(self.page), 
-                 (None, 'section'): self.section}
+        attrs = {(None, 'class'): 'page', (None, 'data-n'): str(self.page),
+                 (None, 'data-section'): self.section}
         super().startElementNS((None, 'div'), 'div', attrs)
         self.reopenAllTags()
 
