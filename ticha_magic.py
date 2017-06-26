@@ -67,7 +67,7 @@ class TEIPager(AugmentedElementTreeContentHandler):
                 self.line += 1
             if tag_eq(qname, 'div'):
                 if attributes:
-                    new_section = attributes.get((self.namespace, 'id'))
+                    new_section = attributes.get((None, 'id'))
                     if new_section:
                         # make 2.01 into 2.1
                         self.section = new_section.replace('.0', '.')
@@ -135,7 +135,9 @@ def preprocess(root, **kwargs):
         if isinstance(val, str):
             kwargs[key] = etree.XSLT.strparam(val)
     ret = xslt_transform(root, **kwargs)
-    print(xslt_transform.error_log)
+    error_msg = str(xslt_transform.error_log).strip()
+    if error_msg:
+        print(error_msg)
     return ret
 
 def paginate(root):

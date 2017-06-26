@@ -1,92 +1,107 @@
-<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
-  <xsl:output method="xhtml"/>
+<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:tei="http://www.tei-c.org/ns/1.0" exclude-result-prefixes="tei">
+  <xsl:output omit-xml-declaration="yes" method="xhtml"/>
   <xsl:param name="spellchoice" select="'orig'"/>
   <xsl:param name="abbrchoice" select="'abbr'"/>
   <xsl:param name="textname" select="''"/>
 
-  <xsl:template match="/TEI">
+
+  <xsl:template match="/tei:TEI">
     <body>
       <xsl:apply-templates/>
     </body>
   </xsl:template>
 
+
   <!-- transform <head> -->
-  <xsl:template match="head">
+  <xsl:template match="tei:head">
     <h4>
       <xsl:apply-templates/>
     </h4>
   </xsl:template>
 
+
   <!-- handle <choice> elements with the $spellchoice and $abbrchoice parameters -->
-  <xsl:template match="orig">
+  <xsl:template match="tei:orig">
     <xsl:if test="$spellchoice = 'orig'">
       <xsl:apply-templates/>
     </xsl:if>
   </xsl:template>
-  <xsl:template match="reg[@type='spacing']">
+
+  <xsl:template match="tei:reg[@type='spacing']">
     <xsl:if test="$spellchoice = 'reg-spacing'">
       <xsl:apply-templates/>
     </xsl:if>
   </xsl:template>
-  <xsl:template match="reg[@type='spanish']">
+
+  <xsl:template match="tei:reg[@type='spanish']">
     <xsl:if test="$spellchoice = 'reg-spanish'">
       <xsl:apply-templates/>
     </xsl:if>
   </xsl:template>
-  <xsl:template match="reg">
+
+  <xsl:template match="tei:reg">
     <xsl:if test="$spellchoice != 'orig'">
       <xsl:apply-templates/>
     </xsl:if>
   </xsl:template>
-  <xsl:template match="abbr">
+
+  <xsl:template match="tei:abbr">
     <xsl:if test="$abbrchoice = 'abbr'">
       <xsl:apply-templates/>
     </xsl:if>
   </xsl:template>
-  <xsl:template match="expan">
+
+  <xsl:template match="tei:expan">
     <xsl:if test="$abbrchoice = 'expan'">
       <xsl:apply-templates/>
     </xsl:if>
   </xsl:template>
 
+
   <!-- transform <p> -->
-  <xsl:template match="p">
+  <xsl:template match="tei:p">
     <p>
       <xsl:apply-templates/>
     </p>
   </xsl:template>
-  <xsl:template match="p[@rend='center']">
+
+  <xsl:template match="tei:p[@rend='center']">
     <p class="center">
       <xsl:apply-templates/>
     </p>
   </xsl:template>
 
+
   <!-- transform <lb> -->
-  <xsl:template match="lb">
+  <xsl:template match="tei:lb">
     <br/>
   </xsl:template>
 
+
   <!-- transform <fw> -->
-  <xsl:template match="fw[@type='catch']|fw[@type='catchword']">
+  <xsl:template match="tei:fw[@type='catch']|tei:fw[@type='catchword']">
     <div class="catch">
       <xsl:apply-templates/>
     </div>
   </xsl:template>
-  <xsl:template match="fw[@type='sig']">
+  
+  <xsl:template match="tei:fw[@type='sig']">
     <div class="sig">
       <xsl:apply-templates/>
     </div>
   </xsl:template>
 
+
   <!-- transform <hi> -->
-  <xsl:template match="hi[@rend='italic']|hi[@rend='italics']">
+  <xsl:template match="tei:hi[@rend='italic']|tei:hi[@rend='italics']">
     <span class="italic">
       <xsl:apply-templates/>
     </span>
   </xsl:template>
 
+
   <!-- transform <foreign> -->
-  <xsl:template match="foreign">
+  <xsl:template match="tei:foreign">
     <xsl:if test="$textname != 'arte'">
       <xsl:apply-templates/>
     </xsl:if>
@@ -97,7 +112,8 @@
       </mark>
     </xsl:if>
   </xsl:template>
-  <xsl:template match="foreign[@rend='italic']|foreign[@rend='italics']">
+  
+  <xsl:template match="tei:foreign[@rend='italic']|tei:foreign[@rend='italics']">
     <xsl:if test="$textname != 'arte'">
       <span class="italic">
         <xsl:apply-templates/>
@@ -113,28 +129,69 @@
     </xsl:if>
   </xsl:template>
 
+
   <!-- preserve these -->
-  <xsl:template match="pb|cb|div|del">
-    <!-- courtesy of stackoverflow.com/questions/26999058/, copies the div attributes -->
-    <xsl:copy>
+  <!-- lots of boilerplate here but there seems to be no easy way to copy nodes without their namespaces in XSLT 1.0 -->
+  <xsl:template match="tei:del">
+    <del>
       <xsl:copy-of select="@*"/>
       <xsl:apply-templates/>
-    </xsl:copy>
-  </xsl:template>
-  <xsl:template match="cb">
-    <xsl:copy>
-      <xsl:copy-of select="@*"/>
-    </xsl:copy>
+    </del>
   </xsl:template>
 
+  <xsl:template match="tei:cb">
+    <cb>
+      <xsl:copy-of select="@*"/>
+      <xsl:apply-templates/>
+    </cb>
+  </xsl:template>
+
+  <xsl:template match="tei:pb">
+    <pb>
+      <xsl:copy-of select="@*"/>
+      <xsl:apply-templates/>
+    </pb>
+  </xsl:template>
+
+  <xsl:template match="tei:div">
+    <div>
+      <xsl:copy-of select="@*"/>
+      <xsl:apply-templates/>
+    </div>
+  </xsl:template>
+
+  <!-- the namespace on xml:id has to be eliminated -->
+  <xsl:template match="tei:div[@xml:id]">
+    <div>
+      <xsl:attribute name="id">
+        <xsl:value-of select="@xml:id" />
+      </xsl:attribute>
+      <xsl:copy-of select="@*[local-name() != 'id']"/>
+      <xsl:apply-templates/>
+    </div>
+  </xsl:template>
+  
+  <xsl:template match="tei:del[@xml:id]">
+    <del>
+      <xsl:attribute name="id">
+        <xsl:value-of select="@xml:id" />
+      </xsl:attribute>
+      <xsl:copy-of select="@*[local-name() != 'id']"/>
+      <xsl:apply-templates/>
+    </del>
+  </xsl:template>
+
+
   <!-- ignore these but copy their contents -->
-  <xsl:template match="pc|i|fw|emph|u|hi|gap|text|choice|ref|front|body|back|g|c|add">
+  <xsl:template match="tei:pc|tei:i|tei:fw|tei:emph|tei:u|tei:hi|tei:gap|tei:text|tei:choice|tei:ref|tei:front|tei:body|tei:back|tei:g|tei:c|tei:add">
     <xsl:apply-templates/>
   </xsl:template>
 
+
   <!-- ignore these and their contents -->
-  <xsl:template match="teiHeader|head[@type='outline']">
+  <xsl:template match="tei:teiHeader|tei:head[@type='outline']">
   </xsl:template>
+
 
   <!-- catch unmatched nodes, courtesy of stackoverflow.com/questions/3360017/ -->
   <xsl:template match="*">
