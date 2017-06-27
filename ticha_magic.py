@@ -11,12 +11,23 @@ from lxml import etree, sax
 
 XSLT_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'transform.xslt')
 
-class AugmentedElementTreeContentHandler(sax.ElementTreeContentHandler):
-    """Augment the lxml implementation to support better error messages."""
+
+class AugmentedContentHandler(sax.ElementTreeContentHandler):
+    """Augment the lxml implementation to support better error messages and provide the useful
+       (though namespace-unaware) startElement and endElement methods.
+    """
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.real_tag_stack = []
+
+    def startElement(self, name, attributes=None):
+        if attributes is not None:
+            attributes = {(None, key): val for key, val in attributes.items()}
+        AugmentedContentHandler.startElementNS(self, (None, name), name, attributes)
+
+    def endElement(self, name):
+        AugmentedContentHandler.endElementNS(self, (None, name), name)
 
     def startElementNS(self, ns_name, qname, attributes=None):
         self.real_tag_stack.append(qname)
@@ -35,8 +46,10 @@ class AugmentedElementTreeContentHandler(sax.ElementTreeContentHandler):
             raise e
 
 
-class TEIPager(AugmentedElementTreeContentHandler):
-    namespace = 'http://www.w3.org/XML/1998/namespace'
+class TEIPager(AugmentedContentHandler):
+    """A SAX parser that transforms <pb/> and <cb/> tags into <div>s that wrap pages and columns,
+       respectively.
+    """
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -54,9 +67,8 @@ class TEIPager(AugmentedElementTreeContentHandler):
             n = attributes.get((None, 'n'))
             self.handleColumnBreak(n)
         elif tag_eq(qname, 'body'):
-            super().startElementNS((None, 'div'), 'div')
-            attrs = {(None, 'class'): 'page', (None, 'data-n'): str(self.page)}
-            super().startElementNS((None, 'div'), 'div', attrs)
+            self.startElement('div')
+            self.startNewPageDiv(str(self.page))
         else:
             if tag_eq(qname, 'br'):
                 self.line += 1
@@ -67,29 +79,31 @@ class TEIPager(AugmentedElementTreeContentHandler):
         self.line = 1
         self.page += 1
         self.closeAllTags()
-        super().endElementNS((None, 'div'), 'div')
-        attrs = {(None, 'class'): 'page', (None, 'data-n'): str(self.page)}
-        super().startElementNS((None, 'div'), 'div', attrs)
+        self.endElement('div')
+        self.startNewPageDiv(str(self.page))
         self.reopenAllTags()
+
+    def startNewPageDiv(self, page_no):
+        self.startElement('div', {'class': 'page', 'data-n': page_no})
 
     def handleColumnBreak(self, n):
         if n == '1':
             # value of '1' indicates start of column section
-            self.startElementNS((None, 'div'), 'div')
-            self.startElementNS((None, 'div'), 'div', {(None, 'class'):'col-xs-6'})
+            self.startElement('div')
+            self.startElement('div', {'class': 'col-xs-6'})
         elif n == '':
             # empty value indicates end of column section
-            self.endElementNS((None, 'div'), 'div')
-            self.endElementNS((None, 'div'), 'div')
+            self.endElement('div')
+            self.endElement('div')
         else:
-            self.endElementNS((None, 'div'), 'div')
-            self.startElementNS((None, 'div'), 'div', {(None, 'class'):'col-xs-6'})
+            self.endElement('div')
+            self.startElement('div', {'class': 'col-xs-6'})
 
     def endElementNS(self, ns_name, qname):
         # ignore self-closing <pb> and <cb> tags; they were already handled by startElementNS
         if tag_eq(qname, 'body'):
-            super().endElementNS((None, 'div'), 'div')
-            super().endElementNS((None, 'div'), 'div')
+            self.endElement('div')
+            self.endElement('div')
         elif not tag_eq(qname, 'pb') and not tag_eq(qname, 'cb'):
             closes = self.tag_stack.pop()
             try:
