@@ -166,7 +166,6 @@
       <xsl:attribute name="id">
         <xsl:value-of select="@xml:id" />
       </xsl:attribute>
-      <xsl:copy-of select="@*[local-name() != 'id']"/>
       <xsl:apply-templates/>
     </div>
   </xsl:template>
