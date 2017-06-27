@@ -100,8 +100,8 @@
   </xsl:template>
 
 
-  <!-- transform <foreign> -->
-  <xsl:template match="tei:foreign">
+  <!-- transform <foreign xml:lang="cvz"> -->
+  <xsl:template match="tei:foreign[@xml:lang='cvz']">
     <xsl:if test="$textname != 'arte'">
       <xsl:apply-templates/>
     </xsl:if>
@@ -183,7 +183,7 @@
 
 
   <!-- ignore these but copy their contents -->
-  <xsl:template match="tei:pc|tei:i|tei:fw|tei:emph|tei:u|tei:hi|tei:gap|tei:text|tei:choice|tei:ref|tei:front|tei:body|tei:back|tei:g|tei:c|tei:add">
+  <xsl:template match="tei:pc|tei:i|tei:fw|tei:emph|tei:u|tei:hi|tei:gap|tei:text|tei:choice|tei:ref|tei:front|tei:body|tei:back|tei:g|tei:c|tei:add|tei:foreign">
     <xsl:apply-templates/>
   </xsl:template>
 
