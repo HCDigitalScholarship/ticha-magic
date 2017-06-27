@@ -62,29 +62,30 @@ class TEIPager(AugmentedContentHandler):
     def startElementNS(self, ns_name, qname, attributes=None):
         if tag_eq(qname, 'pb'):
             if attributes.get((None, 'type')) != 'pdf':
-                self.handlePageBreak()
+                recto_verso_no = attributes.get((None, 'n'), '')
+                self.handlePageBreak(recto_verso_no)
         elif tag_eq(qname, 'cb'):
             n = attributes.get((None, 'n'))
             self.handleColumnBreak(n)
         elif tag_eq(qname, 'body'):
             self.startElement('div')
-            self.startNewPageDiv(str(self.page))
+            self.startNewPageDiv(str(self.page), '0')
         else:
             if tag_eq(qname, 'br'):
                 self.line += 1
             self.tag_stack.append( (ns_name, qname, attributes) )
             super().startElementNS(ns_name, qname, attributes)
 
-    def handlePageBreak(self):
+    def handlePageBreak(self, recto_verso_no):
         self.line = 1
         self.page += 1
         self.closeAllTags()
         self.endElement('div')
-        self.startNewPageDiv(str(self.page))
+        self.startNewPageDiv(str(self.page), recto_verso_no)
         self.reopenAllTags()
 
-    def startNewPageDiv(self, page_no):
-        self.startElement('div', {'class': 'page', 'data-n': page_no})
+    def startNewPageDiv(self, page_no, recto_verso_no):
+        self.startElement('div', {'class': 'page', 'data-n': page_no, 'data-rvn': recto_verso_no})
 
     def handleColumnBreak(self, n):
         if n == '1':
