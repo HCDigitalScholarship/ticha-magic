@@ -45,12 +45,12 @@ class AugmentedContentHandler(sax.ElementTreeContentHandler):
             super().endElementNS(ns_name, qname)
             self.real_tag_stack.pop()
         except sax.SaxError as e:
-            print('Tried to close ' + qname, end='')
+            msg = 'Tried to close <{}>'.format(qname)
             if self.real_tag_stack:
-                print(', but last opened tag was ' + self.real_tag_stack[-1])
+                msg += ', but last opened tag was <{}>'.format(self.real_tag_stack[-1])
             else:
-                print(', but no tags have been opened')
-            raise e
+                msg += ', but no tags have been opened'
+            raise sax.SaxError(msg) from e
 
 
 class TEIPager(AugmentedContentHandler):
@@ -117,8 +117,7 @@ class TEIPager(AugmentedContentHandler):
             try:
                 super().endElementNS(ns_name, qname)
             except sax.SaxError as e:
-                print('Error on page {0.page}, line {0.line}'.format(self))
-                raise e
+                raise sax.SaxError(str(e) + 'on page {0.page}, line {0.line}'.format(self)) from e
 
     def closeAllTags(self):
         for ns_name, qname, _ in reversed(self.tag_stack):
@@ -133,8 +132,15 @@ def xml_to_html(xml_root, flex_data=None, **kwargs):
     """Convert the TEI-encoded XML document to an HTML document."""
     paginated_tree = paginate(preprocess(xml_root, **kwargs))
     if flex_data:
+        logger.debug('xml_to_html: Inserting FLEx data')
         flex_dict = FLExDict(flex_data)
-        return flexify(paginated_tree, flex_dict)
+        ret = flexify(paginated_tree, flex_dict)
+        if FLExParser.total > 0:
+            perc = 100 * (FLExParser.missed / FLExParser.total)
+            logger.debug('xml_to_html: %d words total, %d words missed so far', 
+                         FLExParser.total, FLExParser.missed)
+            logger.debug('xml_to_html: missed %f percent of FLEx words', perc)
+        return ret
     else:
         return paginated_tree
 
@@ -147,7 +153,7 @@ def preprocess(root, **kwargs):
     ret = xslt_transform(root, **kwargs)
     error_msg = str(xslt_transform.error_log).strip()
     if error_msg:
-        print(error_msg)
+        logger.error('ticha_magic.preprocess: %s', error_msg)
     return ret
 
 def paginate(root):
