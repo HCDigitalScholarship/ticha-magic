@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 import argparse
 import os
+import logging
+import sys
 
 from lxml import etree
 
-from ticha_magic import xml_to_html, preprocess
+from ticha_magic import xml_to_html, preprocess, logger
 
 
 FLEX_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'flex.xml')
@@ -54,6 +56,10 @@ if __name__ == '__main__':
     # decide which transform function to use, and what outfile name to generate
     infile_name = os.path.splitext(args.infile)[0]
     kwargs = {'abbrchoice':args.abbrchoice, 'spellchoice':args.spellchoice, 'textname':infile_name}
+    # configure the logger to print messages to stderr (as well as to the Django logs)
+    handler = logging.StreamHandler()
+    logger.addHandler(handler)
+    logger.setLevel(logging.DEBUG)
     if args.preprocess:
         data = tostring(preprocess(fromstring(data), **kwargs))
         outfile = args.outfile or infile_name + '_preprocessed.xml'
