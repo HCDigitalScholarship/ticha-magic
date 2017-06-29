@@ -4,12 +4,14 @@ import sys
 import os
 import io
 import argparse
-import xml.etree.ElementTree as ET
 
 from lxml import etree, sax
 
+from . import flex
+
 
 XSLT_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'transform.xslt')
+FLEX_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'flex.xml')
 
 
 class AugmentedContentHandler(sax.ElementTreeContentHandler):
@@ -122,9 +124,14 @@ class TEIPager(AugmentedContentHandler):
             super().startElementNS(ns_name, qname, attributes)
 
 
-def xml_to_html(xml_root, **kwargs):
+def xml_to_html(xml_root, flex_data=None, **kwargs):
     """Convert the TEI-encoded XML document to an HTML document."""
-    return paginate(preprocess(xml_root, **kwargs))
+    paginated_tree = paginate(preprocess(xml_root, **kwargs))
+    if flex_data:
+        flex_dict = flex.FLExDict(flex_data)
+        return flex.flexify(paginated_tree, flex_dict)
+    else:
+        return paginated_tree
 
 def preprocess(root, **kwargs):
     """Apply the XSLT stylesheet to the TEI-encoded XML document, but do not paginate."""
@@ -202,7 +209,9 @@ if __name__ == '__main__':
         data = tostring(preprocess(fromstring(data), **kwargs))
         outfile = args.outfile or infile_name + '_preprocessed.xml'
     else:
-        data = tostring(xml_to_html(fromstring(data), **kwargs))
+        with open(FLEX_PATH, 'r') as ifsock:
+            flex_data = ifsock.read()
+        data = tostring(xml_to_html(fromstring(data), flex_data=flex_data, **kwargs))
         outfile = args.outfile or infile_name + '.html'
     if args.preview:
         data = _preview_template.format(data)
