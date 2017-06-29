@@ -398,7 +398,7 @@ def strip_accents_and_spaces(s):
     # remove characters between square brackets
     s = re.sub(r'\[\w+\]', '', s)
     # remove punctuation
-    punctuation_list = [',', '.', '[', ']', "'", '?', '*', '’']
+    punctuation_list = [',', '.', '[', ']', "'", '?', '*', '’', '-']
     s = ''.join(char for char in s if char not in punctuation_list)
     return s
 
