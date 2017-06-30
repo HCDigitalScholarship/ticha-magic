@@ -90,7 +90,8 @@ class TEIPager(AugmentedContentHandler):
         self.reopenAllTags()
 
     def startNewPageDiv(self, page_no, recto_verso_no):
-        self.startElement('div', {'class': 'page', 'data-n': page_no, 'data-rvn': recto_verso_no})
+        self.startElement('div', {'class': 'printed-text-page', 'data-n': page_no,
+                                  'data-rvn': recto_verso_no})
 
     def handleColumnBreak(self, n):
         if n == '1':
