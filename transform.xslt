@@ -99,33 +99,11 @@
   </xsl:template>
 
 
-  <!-- transform <foreign xml:lang="cvz"> -->
-  <xsl:template match="tei:foreign[@xml:lang='cvz']">
-    <xsl:if test="$textname != 'arte'">
-      <xsl:apply-templates/>
-    </xsl:if>
-    <!-- Arte-specific logic -->
-    <xsl:if test="$textname = 'arte'">
-      <mark class="trigger">
-        <xsl:apply-templates/>
-      </mark>
-    </xsl:if>
-  </xsl:template>
-  
+  <!-- transform <foreign> -->
   <xsl:template match="tei:foreign[@rend='italic']|tei:foreign[@rend='italics']">
-    <xsl:if test="$textname != 'arte'">
-      <span class="italic">
-        <xsl:apply-templates/>
-      </span>
-    </xsl:if>
-    <!-- Arte-specific logic -->
-    <xsl:if test="$textname = 'arte'">
-      <mark class="trigger">
-        <span class="italic">
-          <xsl:apply-templates/>
-        </span>
-      </mark>
-    </xsl:if>
+    <span class="italic">
+      <xsl:apply-templates/>
+    </span>
   </xsl:template>
 
 
