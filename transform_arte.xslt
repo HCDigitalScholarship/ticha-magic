@@ -20,5 +20,12 @@
     </mark>
   </xsl:template>
 
+  <!-- don't ignore outline headers -->
+  <xsl:template match="tei:head[@type='outline']">
+    <h4 class="outline-header">
+      <xsl:apply-templates/>
+    </h4>
+  </xsl:template>
+
 
 </xsl:stylesheet>
