@@ -1,13 +1,12 @@
-<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:tei="http://www.tei-c.org/ns/1.0" exclude-result-prefixes="tei">
-  <xsl:output omit-xml-declaration="yes" method="xhtml"/>
+<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:tei="http://www.tei-c.org/ns/1.0">
+  <xsl:output omit-xml-declaration="yes" method="xhtml" indent="yes"/>
   <xsl:param name="spellchoice" select="'orig'"/>
   <xsl:param name="abbrchoice" select="'abbr'"/>
-  <xsl:param name="textname" select="''"/>
 
 
-  <xsl:template match="/tei:TEI">
+  <xsl:template match="/">
     <body>
-      <xsl:apply-templates/>
+      <xsl:apply-templates select="tei:TEI/tei:text" />
     </body>
   </xsl:template>
 
@@ -130,34 +129,12 @@
   </xsl:template>
 
 
-  <!-- preserve these -->
-  <!-- lots of boilerplate here but there seems to be no easy way to copy nodes without their namespaces in XSLT 1.0 -->
-  <xsl:template match="tei:del">
-    <del>
+  <!-- preserve these (without the TEI namespace) -->
+  <xsl:template match="tei:del|tei:cb|tei:pb|tei:div">
+    <xsl:element name="{local-name()}">
       <xsl:copy-of select="@*"/>
       <xsl:apply-templates/>
-    </del>
-  </xsl:template>
-
-  <xsl:template match="tei:cb">
-    <cb>
-      <xsl:copy-of select="@*"/>
-      <xsl:apply-templates/>
-    </cb>
-  </xsl:template>
-
-  <xsl:template match="tei:pb">
-    <pb>
-      <xsl:copy-of select="@*"/>
-      <xsl:apply-templates/>
-    </pb>
-  </xsl:template>
-
-  <xsl:template match="tei:div">
-    <div>
-      <xsl:copy-of select="@*"/>
-      <xsl:apply-templates/>
-    </div>
+    </xsl:element>
   </xsl:template>
 
   <!-- the namespace on xml:id has to be eliminated -->
@@ -188,7 +165,7 @@
 
 
   <!-- ignore these and their contents -->
-  <xsl:template match="tei:teiHeader|tei:head[@type='outline']">
+  <xsl:template match="tei:head[@type='outline']">
   </xsl:template>
 
 

@@ -14,7 +14,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-XSLT_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'transform.xslt')
+XSLT_DIR = os.path.dirname(os.path.realpath(__file__))
 
 
 class AugmentedContentHandler(sax.ElementTreeContentHandler):
@@ -143,9 +143,13 @@ def xml_to_html(xml_root, flex_data=None, **kwargs):
     else:
         return paginated_tree
 
-def preprocess(root, **kwargs):
+def preprocess(root, textname='', **kwargs):
     """Apply the XSLT stylesheet to the TEI-encoded XML document, but do not paginate."""
-    xslt_transform = etree.XSLT(etree.parse(XSLT_PATH).getroot())
+    if textname == 'arte':
+        xslt_path = os.path.join(XSLT_DIR, 'transform_arte.xslt')
+    else:
+        xslt_path = os.path.join(XSLT_DIR, 'transform.xslt')
+    xslt_transform = etree.XSLT(etree.parse(xslt_path).getroot())
     for key, val in kwargs.items():
         if isinstance(val, str):
             kwargs[key] = etree.XSLT.strparam(val)

@@ -50,12 +50,23 @@ if __name__ == '__main__':
     parser.add_argument('--spellchoice', choices=['orig', 'reg-spacing', 'reg-spanish'], 
                                          default='orig')
     parser.add_argument('--abbrchoice', choices=['abbr', 'expan'], default='abbr')
+    parser.add_argument('--textname', choices=['arte', 'levanto'])
+    parser.add_argument('--no-flex', action='store_true', help='Disable FLEx insertion')
     args = parser.parse_args()
     with open(args.infile, 'r', encoding='utf-8') as ifsock:
         data = ifsock.read()
     # decide which transform function to use, and what outfile name to generate
     infile_name = os.path.splitext(args.infile)[0]
-    kwargs = {'abbrchoice':args.abbrchoice, 'spellchoice':args.spellchoice, 'textname':infile_name}
+    # figure out the text name, to decide what stylesheet to use
+    if args.textname is not None:
+        textname = args.textname
+    elif 'levanto' in infile_name:
+        textname = 'levanto'
+    elif 'arte' in infile_name:
+        textname = 'arte'
+    else:
+        textname = ''
+    kwargs = {'abbrchoice':args.abbrchoice, 'spellchoice':args.spellchoice, 'textname':textname}
     # configure the logger to print messages to stderr (as well as to the Django logs)
     handler = logging.StreamHandler()
     logger.addHandler(handler)
@@ -64,8 +75,11 @@ if __name__ == '__main__':
         data = tostring(preprocess(fromstring(data), **kwargs))
         outfile = args.outfile or infile_name + '_preprocessed.xml'
     else:
-        with open(FLEX_PATH, 'r') as ifsock:
-            flex_data = ifsock.read()
+        if not args.no_flex:
+            with open(FLEX_PATH, 'r') as ifsock:
+                flex_data = ifsock.read()
+        else:
+            flex_data = None
         data = tostring(xml_to_html(fromstring(data), flex_data=flex_data, **kwargs))
         outfile = args.outfile or infile_name + '.html'
     if args.preview:
