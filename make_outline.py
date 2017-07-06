@@ -5,6 +5,7 @@ import os
 import argparse
 from collections import namedtuple
 
+
 def xml_to_outline(data):
     """Given XML data as a string, return an HTML outline."""
     target = OutlineBuilder()
@@ -13,8 +14,10 @@ def xml_to_outline(data):
     root = target.close()
     return ET.tostring(root, encoding='unicode')
 
+
 # class to represent Sections
 Section = namedtuple('Section', ['number', 'title', 'page'])
+
 
 class OutlineBuilder(ET.TreeBuilder):
     url = '/en/texts/{0.text}/{0.in_progress.page}/original'
@@ -27,7 +30,7 @@ class OutlineBuilder(ET.TreeBuilder):
         self.get_title = False
         # self.number is always a list of strings, e.g. ['1', '2', '7'] for section 1.2.7
         self.number = ['1']
-        super().start('div', {'class':'index'})
+        super().start('div', {'class': 'index'})
         super().start('ul')
 
     def start(self, tag, attrs):
@@ -64,7 +67,7 @@ class OutlineBuilder(ET.TreeBuilder):
         if self.in_progress is not None:
             # check if any nested lists need to be opened/closed based on the section number
             how_many_to_close = len(self.number) - len(self.in_progress.number)
-            if how_many_to_close > 0: 
+            if how_many_to_close > 0:
                 for i in range(how_many_to_close):
                     super().end('ul')
             elif how_many_to_close < 0:
@@ -74,9 +77,9 @@ class OutlineBuilder(ET.TreeBuilder):
                     super().start('li')
                     super().data('.'.join(self.in_progress.number[i:]))
                     super().end('li')
-                super().start('ul', {'id':'section' + '.'.join(self.number)})
+                super().start('ul', {'id': 'section'+'.'.join(self.number)})
             super().start('li')
-            super().start('a', {'href':self.url.format(self)})
+            super().start('a', {'href': self.url.format(self)})
             # i.e., 1.3.1 Licencia
             super().data('.'.join(self.in_progress.number) + ' ' + self.in_progress.title)
             super().end('a')

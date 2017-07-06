@@ -136,7 +136,7 @@ def xml_to_html(xml_root, flex_data=None, **kwargs):
         ret = flexify(paginated_tree, flex_dict)
         if FLExParser.total > 0:
             perc = 100 * (FLExParser.missed / FLExParser.total)
-            logger.debug('xml_to_html: %d words total, %d words missed so far', 
+            logger.debug('xml_to_html: %d words total, %d words missed so far',
                          FLExParser.total, FLExParser.missed)
             logger.debug('xml_to_html: missed %f percent of FLEx words', perc)
         return ret
@@ -239,7 +239,7 @@ class FLExParser(sax.ElementTreeContentHandler):
                 flex_word = FLExDict.lookup(self.section, self.word)
                 # keep track of the missed words
                 FLExParser.total += 1
-                if not flex_word: 
+                if not flex_word:
                     FLExParser.missed += 1
                 with self.E('span', {'class': 'content hide inline'}):
                     self.createFLExWord(flex_word)
@@ -248,12 +248,12 @@ class FLExParser(sax.ElementTreeContentHandler):
             self.word = ''
 
     def createFLExWord(self, flex_word):
-        if not flex_word: 
+        if not flex_word:
             return
         with self.E('table'):
             with self.E('caption'):
                 super().characters(flex_word.name)
-            # if at least one morph and at least one gloss item is non-empty, add 
+            # if at least one morph and at least one gloss item is non-empty, add
             # the whole list to the table
             if any(flex_word.morphs) and any(flex_word.lex_glosses):
                 self.createTableRow(flex_word.morphs)
@@ -348,7 +348,7 @@ def xml_to_flex_word(flex_xml):
     lex_glosses = find_all_items(flex_xml, 'gls')
     # get the literal English gloss
     lit_en_gloss = find_item(flex_xml, 'lit')
-    return FLExWord(name=find_word_name(flex_xml), morphs=morphs, lex_glosses=lex_glosses, 
+    return FLExWord(name=find_word_name(flex_xml), morphs=morphs, lex_glosses=lex_glosses,
                     lit_en_gloss=lit_en_gloss)
 
 
@@ -369,7 +369,7 @@ def find_all_items(parent, child_type):
        strings.
     """
     children = parent.findall(".//morph/item[@type='%s']" % child_type)
-    children_texts = [(child.text if child.text else '') for child in children] 
+    children_texts = [(child.text if child.text else '') for child in children]
     return children_texts
 
 
@@ -389,8 +389,8 @@ def strip_accents_and_spaces(s):
        lowercase, and remove letters in between square brackets.
     """
     accent_dict = {
-        'ǎ': 'a', 'ã': 'a', 'á': 'a', 'ä': 'a', 'à': 'a', 'ã': 'a', 'ā': 'a', 'é': 'e', 'ě': 'e', 
-        'è': 'e', 'ē': 'e', 'ï': 'i', 'í': 'i', 'î': 'i', 'ì': 'i', 'ó': 'o', 'ö': 'o', 'ǒ': 'o', 
+        'ǎ': 'a', 'ã': 'a', 'á': 'a', 'ä': 'a', 'à': 'a', 'ã': 'a', 'ā': 'a', 'é': 'e', 'ě': 'e',
+        'è': 'e', 'ē': 'e', 'ï': 'i', 'í': 'i', 'î': 'i', 'ì': 'i', 'ó': 'o', 'ö': 'o', 'ǒ': 'o',
         'ô': 'o', 'õ': 'o', 'q̃': 'q', 'q̃̃': 'q', 'q~': 'que', 'ſ': 's', 'û': 'u', 'ǔ': 'u', 'ú': 'u'
     }
     for key, val in accent_dict.items():

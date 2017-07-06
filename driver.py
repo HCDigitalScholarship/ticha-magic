@@ -37,6 +37,7 @@ _preview_template = """\
 
 def fromstring(data):
     return etree.XML(bytes(data, encoding='utf-8'))
+
 def tostring(root):
     return etree.tostring(root, method='xml', encoding='unicode')
 
@@ -46,8 +47,8 @@ if __name__ == '__main__':
     parser.add_argument('infile', help='file to read XML from')
     parser.add_argument('outfile', nargs='?', help='file to write to')
     parser.add_argument('--preview', action='store_true', help='generate an HTML preview')
-    parser.add_argument('--preprocess', action='store_true', help='apply the XSLT without paginating')
-    parser.add_argument('--spellchoice', choices=['orig', 'reg-spacing', 'reg-spanish'], 
+    parser.add_argument('--preprocess', action='store_true', help='apply XSLT without paginating')
+    parser.add_argument('--spellchoice', choices=['orig', 'reg-spacing', 'reg-spanish'],
                                          default='orig')
     parser.add_argument('--abbrchoice', choices=['abbr', 'expan'], default='abbr')
     parser.add_argument('--textname', choices=['arte', 'levanto'])
@@ -66,7 +67,7 @@ if __name__ == '__main__':
         textname = 'arte'
     else:
         textname = ''
-    kwargs = {'abbrchoice':args.abbrchoice, 'spellchoice':args.spellchoice, 'textname':textname}
+    kwargs = {'abbrchoice': args.abbrchoice, 'spellchoice': args.spellchoice, 'textname': textname}
     # configure the logger to print messages to stderr (as well as to the Django logs)
     handler = logging.StreamHandler()
     logger.addHandler(handler)
