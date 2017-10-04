@@ -56,13 +56,14 @@ class TEIPager(AugmentedContentHandler):
        respectively.
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, text_name, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # The tag stack is a stack of (ns_name, qname, attributes) tuples that represent the current
         # path in the tree.
         self.tag_stack = []
         self.page = 0
         self.line = 1
+        self.text_name = text_name
 
     def startElementNS(self, ns_name, qname, attributes=None):
         if tag_eq(qname, 'pb'):
@@ -90,7 +91,7 @@ class TEIPager(AugmentedContentHandler):
         self.reopenAllTags()
 
     def startNewPageDiv(self, page_no, recto_verso_no):
-        self.startElement('div', {'class': 'printed-text-page', 'data-n': page_no,
+        self.startElement('div', {'class': 'printed-text-page ' + self.text_name, 'data-n': page_no,
                                   'data-rvn': recto_verso_no})
 
     def handleColumnBreak(self, n):
@@ -127,9 +128,9 @@ class TEIPager(AugmentedContentHandler):
             super().startElementNS(ns_name, qname, attributes)
 
 
-def xml_to_html(xml_root, flex_data=None, **kwargs):
+def xml_to_html(xml_root, text_name='', flex_data=None, **kwargs):
     """Convert the TEI-encoded XML document to an HTML document."""
-    paginated_tree = paginate(preprocess(xml_root, **kwargs))
+    paginated_tree = paginate(preprocess(xml_root, **kwargs), text_name)
     if flex_data:
         logger.debug('xml_to_html: Inserting FLEx data')
         flex_dict = FLExDict(flex_data)
@@ -159,13 +160,12 @@ def preprocess(root, textname='', **kwargs):
         logger.error('ticha_magic.preprocess: %s', error_msg)
     return ret
 
-def paginate(root):
+def paginate(root, text_name):
     """Paginate the TEI-encoded XML document. This entails removing all <pb/> elements and adding
        <div class="page">...</div> elements to wrap each page. This function should be called
        after preprocessing.
     """
-    # I do not understand why it is necessary to cast to bytes here
-    handler = TEIPager()
+    handler = TEIPager(text_name)
     sax.saxify(root, handler)
     return handler.etree
 
