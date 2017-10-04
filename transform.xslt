@@ -100,6 +100,11 @@
 
 
   <!-- transform <foreign> -->
+  <xsl:template match="tei:foreign[@xml:lang='zap']">
+    <span class="zap">
+      <xsl:apply-templates/>
+    </span>
+  </xsl:template>
   <xsl:template match="tei:foreign[@rend='italic']|tei:foreign[@rend='italics']">
     <span class="italic">
       <xsl:apply-templates/>
