@@ -11,7 +11,7 @@
   </xsl:template>
 
 
-  <!-- transform <head> -->
+  <!-- Transform <head> -->
   <xsl:template match="tei:head">
     <h4>
       <xsl:apply-templates/>
@@ -19,7 +19,7 @@
   </xsl:template>
 
 
-  <!-- handle <choice> elements with the $spellchoice and $abbrchoice parameters -->
+  <!-- Handle <choice> elements with the $spellchoice and $abbrchoice parameters -->
   <xsl:template match="tei:orig">
     <xsl:if test="$spellchoice = 'orig'">
       <xsl:apply-templates/>
@@ -57,7 +57,7 @@
   </xsl:template>
 
 
-  <!-- transform <p> -->
+  <!-- Transform <p> -->
   <xsl:template match="tei:p">
     <p>
       <xsl:apply-templates/>
@@ -71,13 +71,13 @@
   </xsl:template>
 
 
-  <!-- transform <lb> -->
+  <!-- Transform <lb> -->
   <xsl:template match="tei:lb">
     <br/>
   </xsl:template>
 
 
-  <!-- transform <fw> -->
+  <!-- Transform <fw> -->
   <xsl:template match="tei:fw[@type='catch']|tei:fw[@type='catchword']">
     <div class="catch">
       <xsl:apply-templates/>
@@ -91,7 +91,7 @@
   </xsl:template>
 
 
-  <!-- transform <hi> -->
+  <!-- Transform <hi> -->
   <xsl:template match="tei:hi[@rend='italic']|tei:hi[@rend='italics']">
     <span class="italic">
       <xsl:apply-templates/>
@@ -99,12 +99,7 @@
   </xsl:template>
 
 
-  <!-- transform <foreign> -->
-  <xsl:template match="tei:foreign[@xml:lang='zap']">
-    <span class="zap">
-      <xsl:apply-templates/>
-    </span>
-  </xsl:template>
+  <!-- Transform <foreign> -->
   <xsl:template match="tei:foreign[@rend='italic']|tei:foreign[@rend='italics']">
     <span class="italic">
       <xsl:apply-templates/>
@@ -112,7 +107,7 @@
   </xsl:template>
 
 
-  <!-- preserve these (without the TEI namespace) -->
+  <!-- Preserve these (without the TEI namespace) -->
   <xsl:template match="tei:del|tei:cb|tei:pb|tei:div">
     <xsl:element name="{local-name()}">
       <xsl:copy-of select="@*"/>
@@ -120,7 +115,7 @@
     </xsl:element>
   </xsl:template>
 
-  <!-- the namespace on xml:id has to be eliminated -->
+  <!-- Eliminate the namespace on xml:id -->
   <xsl:template match="tei:div[@xml:id]">
     <div>
       <xsl:attribute name="id">
@@ -141,18 +136,18 @@
   </xsl:template>
 
 
-  <!-- ignore these but copy their contents -->
+  <!-- Ignore these but copy their contents -->
   <xsl:template match="tei:pc|tei:i|tei:fw|tei:emph|tei:u|tei:hi|tei:gap|tei:text|tei:choice|tei:ref|tei:front|tei:body|tei:back|tei:g|tei:c|tei:add|tei:foreign">
     <xsl:apply-templates/>
   </xsl:template>
 
 
-  <!-- ignore these and their contents -->
+  <!-- Ignore these and their contents -->
   <xsl:template match="tei:head[@type='outline']">
   </xsl:template>
 
 
-  <!-- catch unmatched nodes, courtesy of stackoverflow.com/questions/3360017/ -->
+  <!-- Catch unmatched nodes, courtesy of stackoverflow.com/questions/3360017/ -->
   <xsl:template match="*">
     <xsl:message>STYLESHEET WARNING: unmatched element <xsl:value-of select="name()"/></xsl:message>
     <xsl:apply-templates/>
