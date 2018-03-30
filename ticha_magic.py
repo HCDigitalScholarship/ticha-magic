@@ -10,11 +10,7 @@ from contextlib import contextmanager
 from lxml import etree, sax
 
 
-import logging
-logger = logging.getLogger(__name__)
-
-
-XSLT_DIR = os.path.dirname(os.path.realpath(__file__))
+XSLT_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'xslt')
 
 
 class AugmentedContentHandler(sax.ElementTreeContentHandler):
@@ -132,33 +128,23 @@ def xml_to_html(xml_root, text_name='', flex_data=None, **kwargs):
     """Convert the TEI-encoded XML document to an HTML document."""
     paginated_tree = paginate(preprocess(xml_root, **kwargs), text_name)
     if flex_data:
-        logger.debug('xml_to_html: Inserting FLEx data')
         flex_dict = FLExDict(flex_data)
         ret = flexify(paginated_tree, flex_dict)
-        if FLExParser.total > 0:
-            perc = 100 * (FLExParser.missed / FLExParser.total)
-            logger.debug('xml_to_html: %d words total, %d words missed so far',
-                         FLExParser.total, FLExParser.missed)
-            logger.debug('xml_to_html: missed %f percent of FLEx words', perc)
         return ret
     else:
         return paginated_tree
 
 def preprocess(root, textname='', **kwargs):
     """Apply the XSLT stylesheet to the TEI-encoded XML document, but do not paginate."""
-    if textname == 'arte':
-        xslt_path = os.path.join(XSLT_DIR, 'transform_arte.xslt')
-    else:
-        xslt_path = os.path.join(XSLT_DIR, 'transform.xslt')
+    xslt_file_name = textname.replace('-', '_').replace(' ', '_') + '.xslt'
+    xslt_path = os.path.join(XSLT_DIR, xslt_file_name)
+    if not os.path.isfile(xslt_path):
+        xslt_path = os.path.join(XSLT_DIR, 'base.xslt')
     xslt_transform = etree.XSLT(etree.parse(xslt_path).getroot())
     for key, val in kwargs.items():
         if isinstance(val, str):
             kwargs[key] = etree.XSLT.strparam(val)
-    ret = xslt_transform(root, **kwargs)
-    error_msg = str(xslt_transform.error_log).strip()
-    if error_msg:
-        logger.error('ticha_magic.preprocess: %s', error_msg)
-    return ret
+    return xslt_transform(root, **kwargs)
 
 def paginate(root, text_name):
     """Paginate the TEI-encoded XML document. This entails removing all <pb/> elements and adding
@@ -303,7 +289,6 @@ class FLExDict:
         """Load the FLEx linguistic data from the arte_flex.xml file into a dictionary which can
            then be queried by the lookup method.
         """
-        logger.debug('FLExDict.load: Reading FLEx data')
         tr = etree.fromstring(data)
         # note that this findall call relies on all the <interlinear-text> elements being direct
         # children of the root element
