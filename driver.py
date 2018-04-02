@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
 import argparse
 import os
-import logging
-import sys
 
 from lxml import etree
 
-from ticha_magic import xml_to_html, preprocess, logger
+from ticha_magic import xml_to_html, preprocess
+from make_outline import xml_to_outline
 
 
 FLEX_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'flex.xml')
@@ -45,9 +44,8 @@ def tostring(root):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='convert TEI-encoded XML to HTML')
     parser.add_argument('infile', help='file to read XML from')
-    parser.add_argument('outfile', nargs='?', help='file to write to')
-    parser.add_argument('--preview', action='store_true', help='generate an HTML preview')
-    parser.add_argument('--preprocess', action='store_true', help='apply XSLT without paginating')
+    parser.add_argument('--mode', choices=['normal', 'preview', 'preprocess', 'outline'],
+                                  default='normal')
     parser.add_argument('--spellchoice', choices=['orig', 'reg-spacing', 'reg-spanish'],
                                          default='orig')
     parser.add_argument('--abbrchoice', choices=['abbr', 'expan'], default='abbr')
@@ -56,9 +54,9 @@ if __name__ == '__main__':
     args = parser.parse_args()
     with open(args.infile, 'r', encoding='utf-8') as ifsock:
         data = ifsock.read()
-    # decide which transform function to use, and what outfile name to generate
+    # Decide which transform function to use.
     infile_name = os.path.splitext(args.infile)[0]
-    # figure out the text name, to decide what stylesheet to use
+    # Figure out the text name, to decide what stylesheet to use.
     if args.textname is not None:
         textname = args.textname
     elif 'levanto' in infile_name:
@@ -68,13 +66,10 @@ if __name__ == '__main__':
     else:
         textname = ''
     kwargs = {'abbrchoice': args.abbrchoice, 'spellchoice': args.spellchoice, 'textname': textname}
-    # configure the logger to print messages to stderr (as well as to the Django logs)
-    handler = logging.StreamHandler()
-    logger.addHandler(handler)
-    logger.setLevel(logging.DEBUG)
-    if args.preprocess:
+    if args.mode == 'preprocess':
         data = tostring(preprocess(fromstring(data), **kwargs))
-        outfile = args.outfile or infile_name + '_preprocessed.xml'
+    elif args.mode == 'outline':
+        data = xml_to_outline(data, textname)
     else:
         if not args.no_flex:
             with open(FLEX_PATH, 'r') as ifsock:
@@ -82,9 +77,6 @@ if __name__ == '__main__':
         else:
             flex_data = None
         data = tostring(xml_to_html(fromstring(data), flex_data=flex_data, **kwargs))
-        outfile = args.outfile or infile_name + '.html'
-    if args.preview:
-        data = _preview_template.format(data)
-    # write everything to file
-    with open(outfile, 'w', encoding='utf-8') as ofsock:
-        ofsock.write(data)
+        if args.mode == 'preview':
+            data = _preview_template.format(data)
+    print(data)
