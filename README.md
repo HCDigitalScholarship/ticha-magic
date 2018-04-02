@@ -1,4 +1,6 @@
-# This repository is now moribund.
+Tools for manipulating TEI-encoded documents for the [Ticha](https://ticha.haverford.edu) project.
 
-The main `ticha_magic.py` module and the XSLT stylesheets are now part of the ticha-django-site
-repository. The `make_outline.py` script is in the ticha-xml-tei repository.
+The `ticha_magic` library can
+  - Convert a TEI-encoded XML file into HTML.
+  - Make an HTML outline out of a TEI document.
+  - Insert linguistic annotations from [FLEx](https://software.sil.org/fieldworks/) into an HTML document.
