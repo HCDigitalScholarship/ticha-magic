@@ -5,16 +5,19 @@ import os
 import argparse
 from collections import namedtuple
 
-known_namespaces = ['','http://www.tei-c.org/ns/1.0']
+
+known_namespaces = ['', 'http://www.tei-c.org/ns/1.0']
 
 def tag_eq(tag,tagname):
-    return any(tag == '{%s}%s' % (ns,tagname) for ns in known_namespaces)
+    return any(tag == '{%s}%s' % (ns, tagname) for ns in known_namespaces)
+
 
 def find_attr(attrs,attrname):
     for key in attrs:
         #are we expecting that keys do or don't have namespace prefix?
-        if any(key == '{%s}%s' % (ns,attrname) for ns in known_namespaces):
+        if any(key == '{%s}%s' % (ns, attrname) for ns in known_namespaces):
             return attrs[key]
+
 
 def xml_to_outline(data,text_name):
     """Given XML data as a string, return an HTML outline."""
