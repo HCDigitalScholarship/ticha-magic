@@ -29,7 +29,7 @@ from contextlib import contextmanager
 from lxml import etree, sax
 
 
-def convert_tei_file(xml_file, out_file, xslt_file, *, flex_file=''):
+def convert_tei_file(xml_file, out_file, xslt_file, *, flex_file='', with_css=False):
     """Read a TEI-encoded XML document, convert it to HTML, and write the HTML data to the output
     file.
 
@@ -38,12 +38,43 @@ def convert_tei_file(xml_file, out_file, xslt_file, *, flex_file=''):
       xslt_file: The path to the XSLT stylesheet to be used in the conversion.
       flex_file: If provided, the path to the FLEx XML export containing annotations to be inserted
                  into the HTML.
+      with_css: If true, then the output file will be a full HTML document with links to the
+                stylesheets used on the Ticha website.
 
     See the module docstring for details on the conversion process.
     """
     with open(xml_file, 'r', encoding='utf-8') as ifsock:
         with open(out_file, 'w', encoding='utf-8') as ofsock:
-            ofsock.write(convert_tei_data(ifsock.read(), xslt_file, flex_file=flex_file))
+            html_data = convert_tei_data(ifsock.read(), xslt_file, flex_file=flex_file)
+            if with_css:
+                print('Adding CSS links and HTML shell')
+                html_data = WITH_CSS_TEMPLATE.format(html_data)
+            ofsock.write(html_data)
+
+
+# The HTML template used by convert_tei_file when the with_css keyword argument is true.
+WITH_CSS_TEMPLATE = """\
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <link rel="stylesheet" href="https://ticha.haverford.edu/static/zapotexts/css/page_detail_style.css"/>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"/>
+    <script type="text/javascript" src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  </head>
+  <body>
+    <div class="container">
+      <div class="row text-left">
+        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
+        </div>
+        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
+          {}
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
+"""
 
 
 def convert_tei_data(xml_data, xslt_file, *, flex_file=''):
@@ -85,13 +116,21 @@ def paginate(pseudo_html_root, text_name):
 class AugmentedContentHandler(sax.ElementTreeContentHandler):
     """Augment the lxml implementation to support better error messages and provide the useful
     (though namespace-unaware) startElement and endElement methods.
+
+    This class doesn't do anything interesting itself other than provide the above services to
+    TEIPager, which is a subclass.
     """
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        # The real tag stack keeps track of the actual tags that are currently open. It is used to
+        # print more helpful error messages.
         self.real_tag_stack = []
 
     def startElement(self, name, attributes=None):
+        # In vanilla lxml.sax, every attribute is a (namespace, key) pair, which is a little
+        # annoying to have to write every time when you're not using a namespace. This function
+        # takes a regular dictionary and adds the empty namespace to every attribute.
         if attributes is not None:
             attributes = {(None, key): val for key, val in attributes.items()}
         AugmentedContentHandler.startElementNS(self, (None, name), name, attributes)
@@ -161,11 +200,11 @@ class TEIPager(AugmentedContentHandler):
 
     def handleColumnBreak(self, n):
         if n == '1':
-            # value of '1' indicates start of column section
+            # A value of '1' indicates start of column section.
             self.startElement('div')
             self.startElement('div', {'class': 'col-xs-6'})
         elif n == '':
-            # empty value indicates end of column section
+            # An empty value indicates end of column section.
             self.endElement('div')
             self.endElement('div')
         else:
@@ -173,7 +212,7 @@ class TEIPager(AugmentedContentHandler):
             self.startElement('div', {'class': 'col-xs-6'})
 
     def endElementNS(self, ns_name, qname):
-        # ignore self-closing <pb> and <cb> tags; they were already handled by startElementNS
+        # Ignore self-closing <pb> and <cb> tags; they were already handled by startElementNS.
         if tag_eq(qname, 'body'):
             self.endElement('div')
             self.endElement('div')
@@ -220,7 +259,7 @@ class FLExParser(sax.ElementTreeContentHandler):
         super().__init__(*args, **kwargs)
         self.in_mark_tag = False
         self.flex_dict = flex_dict
-        # the current word and section that the parser is processing
+        # The current word and section that the parser is processing.
         self.word, self.section = '', ''
         self.tag_count = 0
 
@@ -432,10 +471,19 @@ def tag_eq(tag_in_document, tag_to_check):
     return tag_in_document == tag_to_check or tag_in_document.endswith(':' + tag_to_check)
 
 
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('infile')
-    parser.add_argument('-o', '--outfile', required=True)
+    parser.add_argument('-o', '--outfile')
+    parser.add_argument('-f', '--flex', default='')
+    parser.add_argument('-w', '--with-css', action='store_true')
 
     args = parser.parse_args()
-    convert_tei_file(args.infile, args.outfile, 'xslt/base.xslt')
+    if args.outfile:
+        outfile = args.outfile
+    else:
+        outfile = os.path.splitext(args.infile)[0] + '.html'
+        print('Inferred output path', outfile)
+    convert_tei_file(args.infile, outfile, 'xslt/base.xslt', flex_file=args.flex,
+                                                             with_css=args.with_css)
