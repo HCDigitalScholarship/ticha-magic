@@ -4,13 +4,60 @@ import sys
 import os
 import io
 import re
+import argparse
 from collections import namedtuple
 from contextlib import contextmanager
 
 from lxml import etree, sax
 
 
-XSLT_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'xslt')
+XSLT_DIR = 'xslt'
+
+
+def convert_tei_file(xmlfile, outfile):
+    with open(xmlfile, 'r', encoding='utf-8') as ifsock:
+        with open(outfile, 'w', encoding='utf-8') as ofsock:
+            ofsock.write(convert_tei_data(ifsock.read()))
+
+
+def convert_tei_data(xml_data):
+    xml_root = etree.XML(bytes(xml_data, encoding='utf-8'))
+    html_root = xml_to_html(xml_root, abbrchoice='abbr', spellchoice='orig')
+    return etree.tostring(html_root, method='xml', encoding='unicode')
+
+
+def xml_to_html(xml_root, text_name='', flex_data=None, **kwargs):
+    """Convert the TEI-encoded XML document to an HTML document."""
+    paginated_tree = paginate(preprocess(xml_root, **kwargs), text_name)
+    if flex_data:
+        flex_dict = FLExDict(flex_data)
+        ret = flexify(paginated_tree, flex_dict)
+        return ret
+    else:
+        return paginated_tree
+
+
+def preprocess(root, textname='', **kwargs):
+    """Apply the XSLT stylesheet to the TEI-encoded XML document, but do not paginate."""
+    xslt_file_name = textname.replace('-', '_').replace(' ', '_') + '.xslt'
+    xslt_path = os.path.join(XSLT_DIR, xslt_file_name)
+    if not os.path.isfile(xslt_path):
+        xslt_path = os.path.join(XSLT_DIR, 'base.xslt')
+    xslt_transform = etree.XSLT(etree.parse(xslt_path).getroot())
+    for key, val in kwargs.items():
+        if isinstance(val, str):
+            kwargs[key] = etree.XSLT.strparam(val)
+    return xslt_transform(root, **kwargs)
+
+
+def paginate(root, text_name):
+    """Paginate the TEI-encoded XML document. This entails removing all <pb/> elements and adding
+       <div class="page">...</div> elements to wrap each page. This function should be called
+       after preprocessing.
+    """
+    handler = TEIPager(text_name)
+    sax.saxify(root, handler)
+    return handler.etree
 
 
 class AugmentedContentHandler(sax.ElementTreeContentHandler):
@@ -122,38 +169,6 @@ class TEIPager(AugmentedContentHandler):
     def reopenAllTags(self):
         for ns_name, qname, attributes in self.tag_stack:
             super().startElementNS(ns_name, qname, attributes)
-
-
-def xml_to_html(xml_root, text_name='', flex_data=None, **kwargs):
-    """Convert the TEI-encoded XML document to an HTML document."""
-    paginated_tree = paginate(preprocess(xml_root, **kwargs), text_name)
-    if flex_data:
-        flex_dict = FLExDict(flex_data)
-        ret = flexify(paginated_tree, flex_dict)
-        return ret
-    else:
-        return paginated_tree
-
-def preprocess(root, textname='', **kwargs):
-    """Apply the XSLT stylesheet to the TEI-encoded XML document, but do not paginate."""
-    xslt_file_name = textname.replace('-', '_').replace(' ', '_') + '.xslt'
-    xslt_path = os.path.join(XSLT_DIR, xslt_file_name)
-    if not os.path.isfile(xslt_path):
-        xslt_path = os.path.join(XSLT_DIR, 'base.xslt')
-    xslt_transform = etree.XSLT(etree.parse(xslt_path).getroot())
-    for key, val in kwargs.items():
-        if isinstance(val, str):
-            kwargs[key] = etree.XSLT.strparam(val)
-    return xslt_transform(root, **kwargs)
-
-def paginate(root, text_name):
-    """Paginate the TEI-encoded XML document. This entails removing all <pb/> elements and adding
-       <div class="page">...</div> elements to wrap each page. This function should be called
-       after preprocessing.
-    """
-    handler = TEIPager(text_name)
-    sax.saxify(root, handler)
-    return handler.etree
 
 
 ### INSERT FLEX ANNOTATIONS INTO HTML ###
@@ -394,3 +409,12 @@ def strip_accents_and_spaces(s):
 def tag_eq(tag_in_document, tag_to_check):
     """Compare equality of tags ignoring namespaces. Note that this is not commutative."""
     return tag_in_document == tag_to_check or tag_in_document.endswith(':' + tag_to_check)
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('infile')
+    parser.add_argument('-o', '--outfile', required=True)
+
+    args = parser.parse_args()
+    convert_tei_file(args.infile, args.outfile)

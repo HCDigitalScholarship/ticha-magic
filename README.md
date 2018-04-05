@@ -20,7 +20,8 @@ following:
   tags that encode both the original spelling in the document, and a rendition in regularized
   Spanish. There is also a choice between using the full spelling and abbreviations.
 - Paginating the TEI document. Page breaks are indicated in TEI by the `<pb/>` tag; these need to
-  be converted into HTML `<div class="page">...</div>` elements that wrap each page.
+  be converted into HTML `<div class="page">...</div>` elements that wrap each page. A similar
+  transformation must be done for columns indicated by the `<cb/>` tag.
 - Inserting FLEx annotations. Brook has annotated a large number of the Zapotec words in Cordova's
   Arte and provided us with an XML export of her annotations. Each annotation needs to be matched
   with its corresponding word in the HTML, and the contents of the annotation has to be inserted.
