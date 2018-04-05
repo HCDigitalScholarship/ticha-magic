@@ -477,13 +477,28 @@ if __name__ == '__main__':
     parser.add_argument('infile')
     parser.add_argument('-o', '--outfile')
     parser.add_argument('-f', '--flex', default='')
+    parser.add_argument('-x', '--xslt')
     parser.add_argument('-w', '--with-css', action='store_true')
-
     args = parser.parse_args()
+
+    # Infer the output path, if not given.
     if args.outfile:
         outfile = args.outfile
     else:
         outfile = os.path.splitext(args.infile)[0] + '.html'
-        print('Inferred output path', outfile)
-    convert_tei_file(args.infile, outfile, 'xslt/base.xslt', flex_file=args.flex,
-                                                             with_css=args.with_css)
+        print('Inferred output file', outfile)
+
+    # Infer the XSLT file, if not given.
+    if args.xslt:
+        xslt_file = args.xslt
+    else:
+        if 'arte' in args.infile and 'levanto' in args.infile:
+            xslt_file = 'xslt/levanto_arte.xslt'
+        elif 'arte' in args.infile:
+            xslt_file = 'xslt/arte.xslt'
+        else:
+            xslt_file = 'xslt/base.xslt'
+        print('Inferred XSLT file', xslt_file)
+
+    # Run the conversion.
+    convert_tei_file(args.infile, outfile, xslt_file, flex_file=args.flex, with_css=args.with_css)
