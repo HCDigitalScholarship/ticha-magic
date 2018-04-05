@@ -3,20 +3,20 @@
 
 The conversion process goes through the following steps:
 
-    preprocess: XML becomes pseudo-HTML (mostly HTML, but with the TEI <pb/> tags because it is too
-                hard to turn these into <div>...</div> using XSLT).
+    XML -> pseudo-HTML
+      XML becomes pseudo-HTML (mostly HTML, but with the TEI <pb/> tags because it is too
+      hard to turn these into <div>...</div> using XSLT).
 
-    paginate: pseudo-HTML becomes real HTML, by fixing the <pb/> tags.
+    pseudo-HTML -> HTML
+      Pseudo-HTML becomes real HTML, by fixing the <pb/> tags.
 
-    flexify (optional): FLEx insertions from a separate XML file are inserted into the HTML.
-
-
-In short:
-    XML -> pseudo-HTML -> HTML -> HTML with FLEx
+    HTML -> HTML with FLEx (optional)
+      FLEx insertions from a separate XML file are inserted into the HTML.
 
 Use `convert_tei_file` or `convert_tei_data` to carry out the entire conversion in one fell swoop.
-You can also invoke the intermediate functions `preprocess`, `paginate`, and `flexify`, but note
-that for the sake of efficiency these only take XML/HTML trees as arguments, not strings or files.
+You can also invoke the intermediate functions `convert_tei_to_html`, `paginate`, and `flexify`, but
+note that for the sake of efficiency these only take XML/HTML trees as arguments, not strings or
+files.
 """
 import sys
 import os
@@ -51,7 +51,7 @@ def convert_tei_data(xml_data, xslt_file, *, flex_file=''):
     the same as in convert_tei_file.
     """
     xml_root = etree.XML(bytes(xml_data, encoding='utf-8'))
-    pseudo_html_root = preprocess(xml_root, xslt_file, abbrchoice='abbr', spellchoice='orig')
+    pseudo_html_root = convert_tei_to_html(xml_root, xslt_file, abbrchoice='abbr', spellchoice='orig')
     html_root = paginate(pseudo_html_root, '')
     if flex_file:
         with open(flex_file, 'r', encoding='utf-8') as ifsock:
@@ -61,7 +61,7 @@ def convert_tei_data(xml_data, xslt_file, *, flex_file=''):
     return etree.tostring(html_root, method='xml', encoding='unicode')
 
 
-def preprocess(root, xslt_file, textname='', **kwargs):
+def convert_tei_to_html(xml_root, xslt_file, textname='', **kwargs):
     """Apply the XSLT stylesheet to the TEI-encoded XML document, but do not paginate."""
     xslt_transform = etree.XSLT(etree.parse(xslt_file).getroot())
     # Make sure that all of the keyword arguments are string-encoded, because we're about to pass
@@ -69,16 +69,16 @@ def preprocess(root, xslt_file, textname='', **kwargs):
     for key, val in kwargs.items():
         if isinstance(val, str):
             kwargs[key] = etree.XSLT.strparam(val)
-    return xslt_transform(root, **kwargs)
+    return xslt_transform(xml_root, **kwargs)
 
 
-def paginate(root, text_name):
-    """Paginate the TEI-encoded XML document. This entails removing all <pb/> elements and adding
-    <div class="page">...</div> elements to wrap each page. This function should be called after
-    preprocessing.
+def paginate(pseudo_html_root, text_name):
+    """Paginate the output of convert_tei_to_html. This entails removing all <pb/> elements and
+    adding <div class="page">...</div> elements to wrap each page. The output of this function is
+    valid HTML.
     """
     handler = TEIPager(text_name)
-    sax.saxify(root, handler)
+    sax.saxify(pseudo_html_root, handler)
     return handler.etree
 
 
