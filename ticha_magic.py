@@ -1,5 +1,23 @@
 #!/usr/bin/env python3
-"""Convert TEI-encoded XML into human-readable HTML."""
+"""Convert TEI-encoded XML into human-readable HTML.
+
+The conversion process goes through the following steps:
+
+    preprocess: XML becomes pseudo-HTML (mostly HTML, but with the TEI <pb/> tags because it is too
+                hard to turn these into <div>...</div> using XSLT).
+
+    paginate: pseudo-HTML becomes real HTML, by fixing the <pb/> tags.
+
+    flexify (optional): FLEx insertions from a separate XML file are inserted into the HTML.
+
+
+In short:
+    XML -> pseudo-HTML -> HTML -> HTML with FLEx
+
+Use `convert_tei_file` or `convert_tei_data` to carry out the entire conversion in one fell swoop.
+You can also invoke the intermediate functions `preprocess`, `paginate`, and `flexify`, but note
+that for the sake of efficiency these only take XML/HTML trees as arguments, not strings or files.
+"""
 import sys
 import os
 import io
@@ -11,39 +29,43 @@ from contextlib import contextmanager
 from lxml import etree, sax
 
 
-XSLT_DIR = 'xslt'
+def convert_tei_file(xml_file, out_file, xslt_file, *, flex_file=''):
+    """Read a TEI-encoded XML document, convert it to HTML, and write the HTML data to the output
+    file.
+
+      xml_file: The path to a TEI-encoded XML document.
+      html_file: The path to a file to which the HTML data will be written.
+      xslt_file: The path to the XSLT stylesheet to be used in the conversion.
+      flex_file: If provided, the path to the FLEx XML export containing annotations to be inserted
+                 into the HTML.
+
+    See the module docstring for details on the conversion process.
+    """
+    with open(xml_file, 'r', encoding='utf-8') as ifsock:
+        with open(out_file, 'w', encoding='utf-8') as ofsock:
+            ofsock.write(convert_tei_data(ifsock.read(), xslt_file, flex_file=flex_file))
 
 
-def convert_tei_file(xmlfile, outfile):
-    with open(xmlfile, 'r', encoding='utf-8') as ifsock:
-        with open(outfile, 'w', encoding='utf-8') as ofsock:
-            ofsock.write(convert_tei_data(ifsock.read()))
-
-
-def convert_tei_data(xml_data):
+def convert_tei_data(xml_data, xslt_file, *, flex_file=''):
+    """Convert XML data (as a string) into HTML data (as a string). `xslt_file` and `flex_file` are
+    the same as in convert_tei_file.
+    """
     xml_root = etree.XML(bytes(xml_data, encoding='utf-8'))
-    html_root = xml_to_html(xml_root, abbrchoice='abbr', spellchoice='orig')
+    pseudo_html_root = preprocess(xml_root, xslt_file, abbrchoice='abbr', spellchoice='orig')
+    html_root = paginate(pseudo_html_root, '')
+    if flex_file:
+        with open(flex_file, 'r', encoding='utf-8') as ifsock:
+            flex_data = ifsock.read()
+        flex_dict = FLExDict(flex_data)
+        html_root = flexify(html_root, flex_dict)
     return etree.tostring(html_root, method='xml', encoding='unicode')
 
 
-def xml_to_html(xml_root, text_name='', flex_data=None, **kwargs):
-    """Convert the TEI-encoded XML document to an HTML document."""
-    paginated_tree = paginate(preprocess(xml_root, **kwargs), text_name)
-    if flex_data:
-        flex_dict = FLExDict(flex_data)
-        ret = flexify(paginated_tree, flex_dict)
-        return ret
-    else:
-        return paginated_tree
-
-
-def preprocess(root, textname='', **kwargs):
+def preprocess(root, xslt_file, textname='', **kwargs):
     """Apply the XSLT stylesheet to the TEI-encoded XML document, but do not paginate."""
-    xslt_file_name = textname.replace('-', '_').replace(' ', '_') + '.xslt'
-    xslt_path = os.path.join(XSLT_DIR, xslt_file_name)
-    if not os.path.isfile(xslt_path):
-        xslt_path = os.path.join(XSLT_DIR, 'base.xslt')
-    xslt_transform = etree.XSLT(etree.parse(xslt_path).getroot())
+    xslt_transform = etree.XSLT(etree.parse(xslt_file).getroot())
+    # Make sure that all of the keyword arguments are string-encoded, because we're about to pass
+    # them to the XSLT stylesheet.
     for key, val in kwargs.items():
         if isinstance(val, str):
             kwargs[key] = etree.XSLT.strparam(val)
@@ -52,8 +74,8 @@ def preprocess(root, textname='', **kwargs):
 
 def paginate(root, text_name):
     """Paginate the TEI-encoded XML document. This entails removing all <pb/> elements and adding
-       <div class="page">...</div> elements to wrap each page. This function should be called
-       after preprocessing.
+    <div class="page">...</div> elements to wrap each page. This function should be called after
+    preprocessing.
     """
     handler = TEIPager(text_name)
     sax.saxify(root, handler)
@@ -62,7 +84,7 @@ def paginate(root, text_name):
 
 class AugmentedContentHandler(sax.ElementTreeContentHandler):
     """Augment the lxml implementation to support better error messages and provide the useful
-       (though namespace-unaware) startElement and endElement methods.
+    (though namespace-unaware) startElement and endElement methods.
     """
 
     def __init__(self, *args, **kwargs):
@@ -96,7 +118,7 @@ class AugmentedContentHandler(sax.ElementTreeContentHandler):
 
 class TEIPager(AugmentedContentHandler):
     """A SAX parser that transforms <pb/> and <cb/> tags into <div>s that wrap pages and columns,
-       respectively.
+    respectively.
     """
 
     def __init__(self, text_name, *args, **kwargs):
@@ -185,11 +207,11 @@ def flexify(html_root, flex_dict):
 class FLExParser(sax.ElementTreeContentHandler):
     """This parser adds the FLEx data to every Zapotec word contained in a <mark> tag.
 
-       The reason it uses SAX parsing is that it needs to give each <mark> tag a new <span> parent
-       tag, which is difficult to do with a DOM parser but relatively simple with a SAX one.
+    The reason it uses SAX parsing is that it needs to give each <mark> tag a new <span> parent tag,
+    which is difficult to do with a DOM parser but relatively simple with a SAX one.
 
-       Note that this parser will not preserve HTML comments, processing instructions, or anything
-       else that is not a tag or text.
+    Note that this parser will not preserve HTML comments, processing instructions, or anything else
+    that is not a tag or text.
     """
     total = 0
     missed = 0
@@ -285,14 +307,14 @@ FLExWord = namedtuple('FLExWord', ['name', 'lex_glosses', 'morphs', 'lit_en_glos
 
 class FLExDict:
     """A dictionary-like object that can retrieve FLEx data (as FLExWord objects) when given a
-       section title and a word. Note that this class is not intended to be instantiated; just use
-       the FLExDict.lookup function when you need to look up a word.
+    section title and a word. Note that this class is not intended to be instantiated; just use the
+    FLExDict.lookup function when you need to look up a word.
 
-       Internally, the dictionary keys are section titles, and each section title maps to another
-       dictionary (actually a defaultdict so that missed matches return an empty string) which maps
-       from word names to FLEx data. This is because the same word may appear in multiple sections
-       with different FLEx data, so the dictionary has to be partitioned. However, this is an
-       implementation detail that should not concern you - just use the lookup method!
+    Internally, the dictionary keys are section titles, and each section title maps to another
+    dictionary (actually a defaultdict so that missed matches return an empty string) which maps
+    from word names to FLEx data. This is because the same word may appear in multiple sections with
+    different FLEx data, so the dictionary has to be partitioned. However, this is an implementation
+    detail that should not concern you - just use the lookup method!
     """
     dct = {}
 
@@ -302,7 +324,7 @@ class FLExDict:
     @classmethod
     def load(cls, data):
         """Load the FLEx linguistic data from the arte_flex.xml file into a dictionary which can
-           then be queried by the lookup method.
+        then be queried by the lookup method.
         """
         tr = etree.fromstring(data)
         # note that this findall call relies on all the <interlinear-text> elements being direct
@@ -322,7 +344,7 @@ class FLExDict:
     @classmethod
     def lookup(cls, section, word):
         """Look up a word in a certain section of a dictionary. The return value is a FLExWord
-           object, or the empty string if no match is found.
+        object, or the empty string if no match is found.
         """
         word = strip_accents_and_spaces(word)
         # try to find the correct section dictionary
@@ -354,7 +376,7 @@ def xml_to_flex_word(flex_xml):
 
 def find_item(parent, child_type):
     """Find the first <item> descendant of the parent element with a matching type attribute and
-       return its text. If the first matching element has no text, the empty string is returned.
+    return its text. If the first matching element has no text, the empty string is returned.
     """
     child = parent.find(".//item[@type='%s']" % child_type)
     if child is not None:
@@ -365,8 +387,7 @@ def find_item(parent, child_type):
 
 def find_all_items(parent, child_type):
     """Find the all <item> descendants of the parent element with a matching type attribute and
-       return their texts as a list. <item> elements with no text appear in the list as empty
-       strings.
+    return their texts as a list. <item> elements with no text appear in the list as empty strings.
     """
     children = parent.findall(".//morph/item[@type='%s']" % child_type)
     children_texts = [(child.text if child.text else '') for child in children]
@@ -386,7 +407,7 @@ def get_text_name(element):
 
 def strip_accents_and_spaces(s):
     """Remove whitespace, punctuation and accents from accented characters in s, convert to
-       lowercase, and remove letters in between square brackets.
+    lowercase, and remove letters in between square brackets.
     """
     accent_dict = {
         'ǎ': 'a', 'ã': 'a', 'á': 'a', 'ä': 'a', 'à': 'a', 'ã': 'a', 'ā': 'a', 'é': 'e', 'ě': 'e',
@@ -395,14 +416,14 @@ def strip_accents_and_spaces(s):
     }
     for key, val in accent_dict.items():
         s = s.replace(key, val)
-    # remove whitespace
+    # Remove whitespace.
     s = ''.join(s.split())
     s = s.lower()
-    # remove characters between square brackets
+    # Remove characters between square brackets.
     s = re.sub(r'\[\w+\]', '', s)
-    # remove punctuation
-    punctuation_list = [',', '.', '[', ']', "'", '?', '*', '’', '-']
-    s = ''.join(char for char in s if char not in punctuation_list)
+    # Remove punctuation.
+    punctuation_set = set([',', '.', '[', ']', "'", '?', '*', '’', '-'])
+    s = ''.join(char for char in s if char not in punctuation_set)
     return s
 
 
@@ -417,4 +438,4 @@ if __name__ == '__main__':
     parser.add_argument('-o', '--outfile', required=True)
 
     args = parser.parse_args()
-    convert_tei_file(args.infile, args.outfile)
+    convert_tei_file(args.infile, args.outfile, 'xslt/base.xslt')
