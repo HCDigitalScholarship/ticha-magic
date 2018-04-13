@@ -1,5 +1,30 @@
 <TEI xmlns="http://www.tei-c.org/ns/1.0">
   <text>
-    <head>A header</head>
+    <div xml:lang="esp" xml:id="levanto1">
+      <head>A header</head>
+      <head type="outline">This should not show up in the HTML output.</head>
+      <!-- A page break nested inside a div -->
+      <pb n="1"/>
+      Some text, some of it <i>italicized</i>.<lb/>
+      More text, on a new line.<lb/>
+      <p rend="center">Text in a centered paragraph.</p>
+      Some punctuation: <pc type="hyphen">-</pc>.<lb/>
+    </div>
+    <pb n="2"/>
+    <fw type="catchword" place="bottom-right">
+      <hi>
+        cer
+        <pc type="hyphen">-</pc>
+      </hi>
+    </fw>
+    <pb n="3"/>
+    <foreign xml:lang="zap">pichina</foreign> (a Zapotec word)<lb/>
+    <pb n="4"/>
+    <cb n="1"/>
+    This is in one column.
+    <cb n="2"/>
+    This is in the next column.
+    <cb n=""/>
+    This is below the two columns.
   </text>
 </TEI>

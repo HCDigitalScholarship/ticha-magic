@@ -1,3 +1,8 @@
+"""Test the ticha_magic script.
+
+The test runner loads an XML file, converts it to HTML using ticha_magic, and then compares it to
+a stored answer key file.
+"""
 from ticha_magic import convert_tei_data
 
 
