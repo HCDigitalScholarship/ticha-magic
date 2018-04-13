@@ -5,3 +5,10 @@ __pycache__
 *.swp
 .mypy_cache
 *.txt
+
+# This is automatically created by the test runner.
+failed_output.html
+
+# Allow XML and HTML files in the test suite
+!tests/*.html
+!tests/*.xml
