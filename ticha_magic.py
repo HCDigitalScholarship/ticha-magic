@@ -91,10 +91,11 @@ def convert_tei_data(xml_data, xslt_file, *, flex_file=''):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('infile')
-    parser.add_argument('-o', '--outfile')
-    parser.add_argument('-f', '--flex', default='')
-    parser.add_argument('-x', '--xslt')
-    parser.add_argument('-w', '--with-css', action='store_true')
+    parser.add_argument('-o', '--outfile', help='output file to write to')
+    parser.add_argument('-f', '--flex', default='', help='path to JSON file with FLEx annotations')
+    parser.add_argument('-x', '--xslt', help='path to custom XSLT file to use for conversion')
+    parser.add_argument('-w', '--with-css', action='store_true',
+                        help='output a full HTML document with CSS, for easy previewing')
     args = parser.parse_args()
 
     # Infer the output path, if not given.

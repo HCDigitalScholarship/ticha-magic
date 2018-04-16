@@ -11,6 +11,37 @@ produced by the Ticha project at Haverford, and will likely not work as expected
 other TEI documents.
 
 
+## Workflow
+To convert an XML document to HTML:
+
+```bash
+$ ./ticha_magic cordova_arte.xml # output in cordova_arte.html
+```
+
+To specify a specific output file (otherwise, the output file is inferred from the name of the input
+file):
+
+```bash
+$ ./ticha_magic cordova_arte.xml -o output.html
+```
+
+To insert FLEx annotations after HTML conversion:
+
+```bash
+$ ./flexml_to_json.py flex_export_from_brook.xml # create the JSON file
+$ ./ticha_magic cordova_arte.xml -f flex_export_from_brook.json
+```
+
+To specify a custom XSLT file (otherwise, the proper XSLT file is inferred from the name of the
+input file, defaulting to `xslt/base.xslt`):
+
+```bash
+$ ./ticha_magic cordova_arte.xml -x xslt/custom_arte.xslt
+```
+
+To see more options, run `./ticha_magic --help`.
+
+
 ## TEI to HTML conversion
 Converting a TEI-encoded XML document into HTML that we can display on Ticha entails doing the
 following:
