@@ -24,7 +24,7 @@ import os
 from lxml import etree, sax
 
 from xml_to_html import convert_tei_to_html, paginate
-from flexify import flexify
+from flexify2 import flexify
 from common import get_xslt_file, get_output_file
 
 
@@ -84,10 +84,7 @@ def convert_tei_data(xml_data, xslt_file, *, flex_file=''):
     pseudo_html_root = convert_tei_to_html(xml_root, xslt_file, abbrchoice='abbr', spellchoice='orig')
     html_root = paginate(pseudo_html_root, '')
     if flex_file:
-        with open(flex_file, 'r', encoding='utf-8') as ifsock:
-            flex_data = ifsock.read()
-        flex_dict = FLExDict(flex_data)
-        html_root = flexify(html_root, flex_dict)
+        html_root = flexify(html_root, flex_file)
     return etree.tostring(html_root, method='xml', encoding='unicode')
 
 

@@ -4,11 +4,22 @@ format that the TEI FLEx inserter can use.
 
 The JSON output is an object whose keys are the Zapotec words and whose values have the form
 
-  [{"section": "...", "popover_html": "..." }, ... ]
+  [
+    {
+      "section": str,
+      "flex": {
+        "name": str,
+        "morphs": [str],
+        "lex_glosses": [str],
+        "en_gloss": str
+       } 
+    },
+    ...
+  ]
 
-where `section` is the section in the text where the word appears and `popover_html` is the full
-annotation in HTML format, as a string. Each value is a list because a single word may have multiple
-annotations in different sections.
+where `section` is the section in the text where the word appears and `flex` contains enough info
+to construct an annotation as an HTML element. Each value is a list because a single word may have
+multiple annotations in different sections.
 """
 import re
 import argparse
@@ -22,7 +33,8 @@ def convert_flex_to_json(infile, outfile):
     """Read an XML file exported from FLEx and write its data to a JSON file."""
     with open(infile, 'r', encoding='utf-8') as ifsock:
         with open(outfile, 'w', encoding='utf-8') as ofsock:
-            ofsock.write(json.dumps(convert_flex_data_to_json(ifsock.read())))
+            json_data = json.dumps(convert_flex_data_to_json(ifsock.read()), indent=1)
+            ofsock.write(json_data)
 
 
 def convert_flex_data_to_json(data):
@@ -37,8 +49,8 @@ def convert_flex_data_to_json(data):
         for word_element in text_element.findall('.//phrases/word'):
             word_name = find_word_name(word_element)
             key = strip_accents_and_spaces(word_name)
-            popover_html = make_popover_html(word_element)
-            ret[key].append({'section': text_name, 'popover_html': popover_html})
+            flex_object = make_flex_object(word_element)
+            ret[key].append({'section': text_name, 'flex': flex_object})
     return ret
 
 
@@ -53,20 +65,15 @@ def find_word_name(flex_element):
     return ' '.join(word.text for word in flex_element.findall("words/word/item"))
 
 
-def make_popover_html(flex_xml):
+def make_flex_object(flex_xml):
     """Load an XML <word> element into a FLExWord object."""
     name = find_word_name(flex_xml)
     # Get the morphemes and their lexical glosses.
     morphs = find_all_items(flex_xml, 'txt')
     lex_glosses = find_all_items(flex_xml, 'gls')
     # Get the literal English gloss.
-    lit_en_gloss = find_item(flex_xml, 'lit')
-    if any(morphs) and any(lex_glosses):
-        rows = make_table_row(morphs) + make_table_row(lex_glosses)
-    else:
-        rows = ''
-    html_gloss = '<td colspan="{}">\'{}\'</td>'.format(len(morphs), lit_en_gloss)
-    return '<table><caption>' + name + '</caption>' + rows + html_gloss;
+    en_gloss = find_item(flex_xml, 'lit')
+    return {'name': name, 'morphs': morphs, 'lex_glosses': lex_glosses, 'en_gloss': en_gloss}
 
 
 def make_table_row(entries):
