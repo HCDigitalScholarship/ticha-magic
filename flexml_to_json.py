@@ -21,12 +21,13 @@ where `section` is the section in the text where the word appears and `flex` con
 to construct an annotation as an HTML element. Each value is a list because a single word may have
 multiple annotations in different sections.
 """
-import re
 import argparse
 import os
 import json
 from collections import defaultdict
 from lxml import etree
+
+from common import strip_accents_and_spaces
 
 
 def convert_flex_to_json(infile, outfile):
@@ -98,28 +99,6 @@ def find_all_items(parent, child_type):
     children = parent.findall(".//morph/item[@type='%s']" % child_type)
     children_texts = [(child.text if child.text else '') for child in children]
     return children_texts
-
-
-def strip_accents_and_spaces(s):
-    """Remove whitespace, punctuation and accents from accented characters in s, convert to
-    lowercase, and remove letters in between square brackets.
-    """
-    accent_dict = {
-        'ǎ': 'a', 'ã': 'a', 'á': 'a', 'ä': 'a', 'à': 'a', 'ã': 'a', 'ā': 'a', 'é': 'e', 'ě': 'e',
-        'è': 'e', 'ē': 'e', 'ï': 'i', 'í': 'i', 'î': 'i', 'ì': 'i', 'ó': 'o', 'ö': 'o', 'ǒ': 'o',
-        'ô': 'o', 'õ': 'o', 'q̃': 'q', 'q̃̃': 'q', 'q~': 'que', 'ſ': 's', 'û': 'u', 'ǔ': 'u', 'ú': 'u'
-    }
-    for key, val in accent_dict.items():
-        s = s.replace(key, val)
-    # Remove whitespace.
-    s = ''.join(s.split())
-    s = s.lower()
-    # Remove characters between square brackets.
-    s = re.sub(r'\[\w+\]', '', s)
-    # Remove punctuation.
-    punctuation_set = set([',', '.', '[', ']', "'", '?', '*', '’', '-'])
-    s = ''.join(char for char in s if char not in punctuation_set)
-    return s
 
 
 if __name__ == '__main__':

@@ -24,7 +24,7 @@ import os
 from lxml import etree, sax
 
 from xml_to_html import convert_tei_to_html, paginate
-from flexify2 import flexify
+from flexify import flexify
 from common import get_xslt_file, get_output_file
 
 
