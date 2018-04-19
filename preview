@@ -1,0 +1,4 @@
+#!/bin/bash
+
+./ticha_magic.py $@ -o preview.html -w
+google-chrome preview.html
