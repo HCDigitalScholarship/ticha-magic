@@ -16,6 +16,7 @@ into a web page.
 import xml.etree.ElementTree as ET
 import os
 import argparse
+import textwrap
 from collections import namedtuple
 
 
@@ -134,7 +135,13 @@ def infer_text_name(infile):
     elif 'levanto' in infile:
         return 'levanto'
     else:
-        return 'arte'
+        msg = '''\
+                Text name could not be inferred automatically. The choices are
+                    arte
+                    levanto
+                    levanto-arte
+                Please enter one of the above: '''
+        return input(textwrap.dedent(msg))
 
 
 if __name__ == '__main__':
