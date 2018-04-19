@@ -1,40 +1,53 @@
 #!/usr/bin/env python3
-"""Generate an HTML outline from a TEI-encoded XML document."""
+"""Generate an HTML outline from a TEI-encoded XML document.
+
+The TEI documents contain sections that are structured like so:
+
+    <div xml:id="arte1.2.3">
+      ...
+      <head type="outline">Cathecismo</head>
+      ...
+    </div>
+
+The outline builder reads through the TEI and combines the section number in the <div> tag with the
+section title in the <head> tag. It outputs the outline in a nice HTML format that can be pasted
+into a web page.
+"""
 import xml.etree.ElementTree as ET
 import os
 import argparse
 from collections import namedtuple
 
 
-known_namespaces = ['', 'http://www.tei-c.org/ns/1.0']
-
-def tag_eq(tag,tagname):
-    return any(tag == '{%s}%s' % (ns, tagname) for ns in known_namespaces)
-
-
-def find_attr(attrs,attrname):
-    for key in attrs:
-        #are we expecting that keys do or don't have namespace prefix?
-        if any(key == '{%s}%s' % (ns, attrname) for ns in known_namespaces):
-            return attrs[key]
-
-
-def xml_to_outline(data, text_prefix):
-    """Given XML data as a string, return an HTML outline."""
-    target = OutlineBuilder(text=text_prefix)
+def xml_to_outline(data, text_name):
+    """Given XML data as a string, return an HTML outline as a string. text_name is used to
+    construct URLs in the outline, so it should be the short name of the text as it is displayed in
+    URLs on the Ticha site.
+    """
+    target = OutlineBuilder(text=text_name)
     parser = ET.XMLParser(target=target)
     parser.feed(data)
     root = target.close()
     return ET.tostring(root, encoding='unicode')
 
 
-# class to represent Sections
+known_namespaces = ['', 'http://www.tei-c.org/ns/1.0']
+
+def tag_eq(tag, tagname):
+    return any(tag == '{%s}%s' % (ns, tagname) for ns in known_namespaces)
+
+
+def find_attr(attrs, attrname):
+    for key in attrs:
+        #are we expecting that keys do or don't have namespace prefix?
+        if any(key == '{%s}%s' % (ns, attrname) for ns in known_namespaces):
+            return attrs[key]
+
+
 Section = namedtuple('Section', ['number', 'title', 'page'])
 
 
 class OutlineBuilder(ET.TreeBuilder):
-    url = '/en/texts/{0.text}/{0.in_progress.page}/original'
-
     def __init__(self, *args, text='levanto', first_page=0, **kwargs):
         super().__init__(*args, **kwargs)
         self.text = text
@@ -53,12 +66,14 @@ class OutlineBuilder(ET.TreeBuilder):
             for key, value in attrs.items():
                 if key.endswith('id') and value.startswith(self.text):
                     number = value[len(self.text):].split('.')
-                    # write the previous section
+                    # Write the previous section.
                     self.write_section()
                     self.in_progress = Section(number, '', str(self.page))
                     break
-        elif tag_eq(tag, 'head') and find_attr(attrs,'type') == 'outline':
+        elif tag_eq(tag, 'head') and find_attr(attrs, 'type') == 'outline':
             self.get_title = True
+        if 'head' in tag:
+            print(tag)
 
     def end(self, tag):
         if tag == 'head':
@@ -92,15 +107,18 @@ class OutlineBuilder(ET.TreeBuilder):
                     super().end('li')
                 super().start('ul', {'id': 'section'+'.'.join(self.number)})
             super().start('li')
-            super().start('a', {'href': self.url.format(self)})
+            super().start('a', {'href': self.make_url()})
             # i.e., 1.3.1 Licencia
             super().data('.'.join(self.in_progress.number) + ' ' + self.in_progress.title)
             super().end('a')
             super().end('li')
             self.number = self.in_progress.number
 
+    def make_url(self):
+        return '/en/texts/{}/{}/original'.format(self.text, self.in_progress.page)
 
-def infer_text_prefix(infile):
+
+def infer_text_name(infile):
     """Infer the correct text prefix based on the file name."""
     if 'arte' in infile:
         if 'levanto' in infile:
@@ -127,12 +145,12 @@ if __name__ == '__main__':
         print('Inferred output file', outfile)
 
     if args.text:
-        text_prefix = args.text
+        text_name = args.text
     else:
-        text_prefix = infer_text_prefix(args.infile)
-        print('Inferred text prefix', text_prefix)
+        text_name = infer_text_name(args.infile)
+        print('Inferred text name', text_name)
 
     with open(args.infile, 'r', encoding='utf-8') as ifsock:
-        data = xml_to_outline(ifsock.read(), text_prefix=text_prefix)
+        data = xml_to_outline(ifsock.read(), text_name=text_name)
     with open(outfile, 'w', encoding='utf-8') as ofsock:
         ofsock.write(data)
