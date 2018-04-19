@@ -41,6 +41,16 @@ $ ./ticha_magic cordova_arte.xml -x xslt/custom_arte.xslt
 
 To see more options, run `./ticha_magic --help`.
 
+You can also instantly preview a text like this:
+
+```bash
+$ ./preview cordova_arte.xml
+```
+
+The `preview` script should open up the HTML document in your default web browser, with mostly the
+same CSS and page layout as on the actual Ticha site. The script takes all the same arguments as
+`ticha_magic`, except you shouldn't pass it `-o` because it sets its own output file.
+
 
 ## TEI to HTML conversion
 Converting a TEI-encoded XML document into HTML that we can display on Ticha entails doing the
