@@ -34,14 +34,20 @@ def xml_to_outline(data, text_name):
 known_namespaces = ['', 'http://www.tei-c.org/ns/1.0']
 
 def tag_eq(tag, tagname):
-    return any(tag == '{%s}%s' % (ns, tagname) for ns in known_namespaces)
+    """Return True if the tags are equal regardless of namespace. `tagname` should be a constant
+    string with no namespace prefix, e.g. 'div'.
+    """
+    return tag == tagname or any(tag == '{%s}%s' % (ns, tagname) for ns in known_namespaces)
 
 
 def find_attr(attrs, attrname):
+    """Compute attrs.get(attrname), except do not consider namespaces when looking for matches in
+    the dictionary, so find_attr(attrs, 'type') and find_attr('{...}type') are equivalent.
+    """
     for key in attrs:
-        #are we expecting that keys do or don't have namespace prefix?
-        if any(key == '{%s}%s' % (ns, attrname) for ns in known_namespaces):
+        if key == attrname or any(key == '{%s}%s' % (ns, attrname) for ns in known_namespaces):
             return attrs[key]
+    return None
 
 
 Section = namedtuple('Section', ['number', 'title', 'page'])
@@ -72,11 +78,9 @@ class OutlineBuilder(ET.TreeBuilder):
                     break
         elif tag_eq(tag, 'head') and find_attr(attrs, 'type') == 'outline':
             self.get_title = True
-        if 'head' in tag:
-            print(tag)
 
     def end(self, tag):
-        if tag == 'head':
+        if tag_eq(tag, 'head'):
             self.get_title = False
 
     def data(self, data):
@@ -115,7 +119,9 @@ class OutlineBuilder(ET.TreeBuilder):
             self.number = self.in_progress.number
 
     def make_url(self):
-        return '/en/texts/{}/{}/original'.format(self.text, self.in_progress.page)
+        return 'https://ticha.haverford.edu/en/texts/{}/{}/original'.format(
+                   self.text, self.in_progress.page
+                )
 
 
 def infer_text_name(infile):
