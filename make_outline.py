@@ -19,9 +19,9 @@ def find_attr(attrs,attrname):
             return attrs[key]
 
 
-def xml_to_outline(data,text_name):
+def xml_to_outline(data, text_prefix):
     """Given XML data as a string, return an HTML outline."""
-    target = OutlineBuilder(text=text_name)
+    target = OutlineBuilder(text=text_prefix)
     parser = ET.XMLParser(target=target)
     parser.feed(data)
     root = target.close()
@@ -35,7 +35,7 @@ Section = namedtuple('Section', ['number', 'title', 'page'])
 class OutlineBuilder(ET.TreeBuilder):
     url = '/en/texts/{0.text}/{0.in_progress.page}/original'
 
-    def __init__(self, *args, text = 'levanto', first_page=0, **kwargs):
+    def __init__(self, *args, text='levanto', first_page=0, **kwargs):
         super().__init__(*args, **kwargs)
         self.text = text
         self.page = first_page
@@ -100,14 +100,39 @@ class OutlineBuilder(ET.TreeBuilder):
             self.number = self.in_progress.number
 
 
+def infer_text_prefix(infile):
+    """Infer the correct text prefix based on the file name."""
+    if 'arte' in infile:
+        if 'levanto' in infile:
+            return 'levanto-arte'
+        else:
+            return 'arte'
+    elif 'levanto' in infile:
+        return 'levanto'
+    else:
+        return 'arte'
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('infile', help='XML file to read from')
-    parser.add_argument('outfile', nargs='?', help='file to write outline to')
-    parser.add_argument('text_name', help='short name of text, i.e. "levanto-arte".')
+    parser.add_argument('-o', '--outfile', nargs='?', help='file to write outline to')
+    parser.add_argument('-t', '--text', nargs='?', help='short name of text, i.e. "levanto-arte".')
     args = parser.parse_args()
-    outfile = args.outfile or (os.path.splitext(args.infile)[0] + '_outline.html')
+
+    if args.outfile:
+        outfile = args.outfile
+    else:
+        outfile = os.path.splitext(args.infile)[0] + '_outline.html'
+        print('Inferred output file', outfile)
+
+    if args.text:
+        text_prefix = args.text
+    else:
+        text_prefix = infer_text_prefix(args.infile)
+        print('Inferred text prefix', text_prefix)
+
     with open(args.infile, 'r', encoding='utf-8') as ifsock:
-        data = xml_to_outline(ifsock.read(),text_name=args.text_name)
+        data = xml_to_outline(ifsock.read(), text_prefix=text_prefix)
     with open(outfile, 'w', encoding='utf-8') as ofsock:
         ofsock.write(data)
