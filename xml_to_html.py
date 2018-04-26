@@ -15,7 +15,8 @@ def convert_tei_to_html(xml_root, xslt_file, textname='', **kwargs):
 
 
 def paginate(pseudo_html_root, text_name):
-    """Paginate the output of convert_tei_to_html. This entails removing all <pb/> elements and
+    """
+    Paginate the output of convert_tei_to_html. This entails removing all <pb/> elements and
     adding <div class="page">...</div> elements to wrap each page. The output of this function is
     valid HTML.
     """
@@ -25,7 +26,8 @@ def paginate(pseudo_html_root, text_name):
 
 
 class AugmentedContentHandler(sax.ElementTreeContentHandler):
-    """Augment the lxml implementation to support better error messages and provide the useful
+    """
+    Augment the lxml implementation to support better error messages and provide the useful
     (though namespace-unaware) startElement and endElement methods.
 
     This class doesn't do anything interesting itself other than provide the above services to
@@ -67,7 +69,8 @@ class AugmentedContentHandler(sax.ElementTreeContentHandler):
 
 
 class TEIPager(AugmentedContentHandler):
-    """A SAX parser that transforms <pb/> and <cb/> tags into <div>s that wrap pages and columns,
+    """
+    A SAX parser that transforms <pb/> and <cb/> tags into <div>s that wrap pages and columns,
     respectively.
     """
 

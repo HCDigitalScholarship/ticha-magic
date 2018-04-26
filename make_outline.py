@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Generate an HTML outline from a TEI-encoded XML document.
+"""
+Generate an HTML outline from a TEI-encoded XML document.
 
 The TEI documents contain sections that are structured like so:
 
@@ -21,9 +22,10 @@ from collections import namedtuple
 
 
 def xml_to_outline(data, text_name):
-    """Given XML data as a string, return an HTML outline as a string. text_name is used to
-    construct URLs in the outline, so it should be the short name of the text as it is displayed in
-    URLs on the Ticha site.
+    """
+    Given XML data as a string, return an HTML outline as a string. text_name is used to construct
+    URLs in the outline, so it should be the short name of the text as it is displayed in URLs on
+    the Ticha site.
     """
     target = OutlineBuilder(text=text_name)
     parser = ET.XMLParser(target=target)
@@ -35,15 +37,17 @@ def xml_to_outline(data, text_name):
 known_namespaces = ['', 'http://www.tei-c.org/ns/1.0']
 
 def tag_eq(tag, tagname):
-    """Return True if the tags are equal regardless of namespace. `tagname` should be a constant
-    string with no namespace prefix, e.g. 'div'.
+    """
+    Return True if the tags are equal regardless of namespace. `tagname` should be a constant string
+    with no namespace prefix, e.g. 'div'.
     """
     return tag == tagname or any(tag == '{%s}%s' % (ns, tagname) for ns in known_namespaces)
 
 
 def find_attr(attrs, attrname):
-    """Compute attrs.get(attrname), except do not consider namespaces when looking for matches in
-    the dictionary, so find_attr(attrs, 'type') and find_attr('{...}type') are equivalent.
+    """
+    Compute attrs.get(attrname), except do not consider namespaces when looking for matches in the
+    dictionary, so find_attr(attrs, 'type') and find_attr('{...}type') are equivalent.
     """
     for key in attrs:
         if key == attrname or any(key == '{%s}%s' % (ns, attrname) for ns in known_namespaces):
@@ -120,9 +124,8 @@ class OutlineBuilder(ET.TreeBuilder):
             self.number = self.in_progress.number
 
     def make_url(self):
-        return 'https://ticha.haverford.edu/en/texts/{}/{}/original'.format(
-                   self.text, self.in_progress.page
-                )
+        return 'https://ticha.haverford.edu/en/texts/{}/{}/original'.format(self.text,
+            self.in_progress.page)
 
 
 def infer_text_name(infile):

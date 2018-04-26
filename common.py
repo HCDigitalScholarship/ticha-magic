@@ -24,8 +24,9 @@ def get_xslt_file(input_file):
 
 
 def strip_accents_and_spaces(s):
-    """Remove whitespace, punctuation and accents from accented characters in s, convert to
-    lowercase, and remove letters in between square brackets.
+    """
+    Remove whitespace, punctuation and accents from accented characters in s, convert to lowercase,
+    and remove letters in between square brackets.
     """
     accent_dict = {
         'ǎ': 'a', 'ã': 'a', 'á': 'a', 'ä': 'a', 'à': 'a', 'ã': 'a', 'ā': 'a', 'é': 'e', 'ě': 'e',

@@ -1,4 +1,5 @@
-"""Insert FLEx annotations into HTML. Works on the output of the pseudo-HTML -> HTML stage in the
+"""
+Insert FLEx annotations into HTML. Works on the output of the pseudo-HTML -> HTML stage in the
 ticha_magic converter.
 """
 import json
@@ -20,7 +21,8 @@ def flexify(html_root, flex_file):
 
 
 class FLExParser(sax.ElementTreeContentHandler):
-    """This parser adds the FLEx data to every Zapotec word contained in a <mark> tag.
+    """
+    This parser adds the FLEx data to every Zapotec word contained in a <mark> tag.
 
     The reason it uses SAX parsing is that it needs to give each <mark> tag a new <span> parent tag,
     which is difficult to do with a DOM parser but relatively simple with a SAX one.
@@ -117,7 +119,8 @@ class FLExParser(sax.ElementTreeContentHandler):
 
 
 def lookup(flex_dict, word, section):
-    """Look up a word that appears in a certain section of the text in the FLEx dictionary. Return
+    """
+    Look up a word that appears in a certain section of the text in the FLEx dictionary. Return
     the word as a JSON object (see the docstring of flexml_to_json.py for the exact format).
     """
     word = strip_accents_and_spaces(word)
