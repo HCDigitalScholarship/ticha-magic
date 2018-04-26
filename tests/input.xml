@@ -26,5 +26,10 @@
     This is in the next column.
     <cb n=""/>
     This is below the two columns.
+
+    <div xml:id="levanto2">
+      This word: <foreign xml:lang="zap">pichina</foreign> should be matched to a different FLEx
+      annotation since it's in a different section.
+    </div>
   </text>
 </TEI>

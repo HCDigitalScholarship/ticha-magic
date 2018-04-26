@@ -8,6 +8,15 @@
         "lex_glosses": ["deer"],
         "name": "pichina"
       }
+    },
+    {
+      "section": "levanto2",
+      "flex": {
+        "en_gloss": "also deer",
+        "morphs": ["pichina"],
+        "lex_glosses": ["also deer"],
+        "name": "pichina"
+      }
     }
   ]
 }
