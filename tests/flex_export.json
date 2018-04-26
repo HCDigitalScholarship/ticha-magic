@@ -1,0 +1,13 @@
+{
+  "pichina": [
+    {
+      "section": "levanto1",
+      "flex": {
+        "en_gloss": "deer",
+        "morphs": ["pichina"],
+        "lex_glosses": ["deer"],
+        "name": "pichina"
+      }
+    }
+  ]
+}
