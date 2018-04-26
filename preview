@@ -1,4 +1,8 @@
 #!/bin/bash
+# Easily preview what output the whole toolchain would generate.
+#
+# Use like this:
+#   ./preview cordova_arte.html
 
 ./ticha_magic.py $@ -o preview.html -w
 xdg-open preview.html

@@ -1,6 +1,6 @@
 """
 Insert FLEx annotations into HTML. Works on the output of the pseudo-HTML -> HTML stage in the
-ticha_magic converter.
+ticha_magic converter. Users of this library should only use the flexify() function.
 """
 import json
 from contextlib import contextmanager
@@ -39,7 +39,6 @@ class FLExParser(sax.ElementTreeContentHandler):
         self.missed = 0
         # The current word and section that the parser is processing.
         self.word, self.section = '', ''
-        self.tag_count = 0
 
     def startElement(self, tag, attributes=None):
         """A helper function that wraps startElementNS, without bothering with namespaces."""
@@ -59,7 +58,6 @@ class FLExParser(sax.ElementTreeContentHandler):
 
     def startElementNS(self, ns_name, qname, attributes=None):
         if qname == 'mark':
-            self.tag_count += 1
             # Wrap each <mark> tag in a <span> for the popovers script.
             self.startElement('span', {'class': 'popover-markup inline'})
             self.in_mark_tag = True

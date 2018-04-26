@@ -1,10 +1,18 @@
-"""Define common functions used by multiple modules in the repository."""
+"""Common functions used by multiple modules in the repository."""
 import os
 import re
 
 
 def tag_eq(tag_in_document, tag_to_check):
-    """Compare equality of tags ignoring namespaces. Note that this is not commutative."""
+    """
+    Compare equality of tags ignoring namespaces.
+
+      tag_in_document: the value of a tag encountered while parsing a document, which may begin
+        with a namespace.
+      tag_to_check: an XML/HTML tag as a literal string which MAY NOT begin with a namespace.
+
+    Note that this is not commutative.
+    """
     return tag_in_document == tag_to_check or tag_in_document.endswith(':' + tag_to_check)
 
 
@@ -14,7 +22,7 @@ def get_output_file(input_file):
 
 
 def get_xslt_file(input_file):
-    """Given the file path of a TEI text, infer the proper XSLT stylesheet to use."""
+    """Infer the proper XSLT stylesheet for a TEI text given its file path."""
     if 'arte' in input_file and 'levanto' in input_file:
         return 'xslt/levanto_arte.xslt'
     elif 'arte' in input_file:

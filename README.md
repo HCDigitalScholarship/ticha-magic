@@ -52,7 +52,10 @@ same CSS and page layout as on the actual Ticha site. The script takes all the s
 `ticha_magic`, except you shouldn't pass it `-o` because it sets its own output file.
 
 
-## TEI to HTML conversion
+## Technical details
+This section is for people who want to tinker with the code.
+
+### TEI to HTML conversion
 Converting a TEI-encoded XML document into HTML that we can display on Ticha entails doing the
 following:
 
@@ -76,6 +79,6 @@ The last two bullet points are handled by the Python code in `ticha_magic.py`. P
 insertion are done with SAX parsers because they have to do tree insertions that are difficult to
 accomplish with DOM parsers. The details of their implementations are documented in the source code.
 
-## TEI to outline
+### TEI to outline
 Making an outline from a TEI document is straightforward compared to converting it to HTML. See
 the `make_outline.py` script for details.

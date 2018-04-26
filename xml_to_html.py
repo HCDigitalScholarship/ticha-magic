@@ -1,3 +1,8 @@
+"""
+Turn XML into HTML (by way of an intermediate pseudo-HTML step).
+
+The main module functions are convert_tei_to_html() and paginate().
+"""
 from lxml import etree, sax
 
 from common import tag_eq
@@ -109,8 +114,12 @@ class TEIPager(AugmentedContentHandler):
         self.reopenAllTags()
 
     def startNewPageDiv(self, page_no, recto_verso_no):
-        self.startElement('div', {'class': 'printed-text-page ' + self.text_name, 'data-n': page_no,
-                                  'data-rvn': recto_verso_no})
+        attrs = {
+            'class': 'printed-text-page ' + self.text_name,
+            'data-n': page_no,
+            'data-rvn': recto_verso_no,
+        }
+        self.startElement('div', attrs)
 
     def handleColumnBreak(self, n):
         if n == '1':
