@@ -31,7 +31,16 @@ from flexify import flexify
 from common import get_xslt_file, get_output_file
 
 
-def convert_tei_file(xml_file, out_file, xslt_file, *, flex_file='', with_css=False):
+def convert_tei_file(
+    xml_file,
+    out_file,
+    xslt_file,
+    *,
+    flex_file='',
+    with_css=False,
+    abbrchoice='abbr',
+    spellchoice='orig'
+):
     """
     Read a TEI-encoded XML document, convert it to HTML, and write the HTML data to the
     output file.
@@ -80,14 +89,17 @@ WITH_CSS_TEMPLATE = """\
 """
 
 
-def convert_tei_data(xml_data, xslt_file, *, flex_file=''):
+def convert_tei_data(
+    xml_data, xslt_file, *, abbrchoice='abbr', spellchoice='orig', flex_file=''
+):
     """
     Convert XML data (as a string) into HTML data (as a string). `xslt_file` and
     `flex_file` are the same as in convert_tei_file.
     """
     xml_root = etree.XML(bytes(xml_data, encoding='utf-8'))
-    pseudo_html_root = convert_tei_to_html(xml_root, xslt_file, abbrchoice='abbr',
-        spellchoice='orig')
+    pseudo_html_root = convert_tei_to_html(
+        xml_root, xslt_file, abbrchoice=abbrchoice, spellchoice=spellchoice
+    )
     html_root = paginate(pseudo_html_root, '')
     if flex_file:
         html_root = flexify(html_root, flex_file)
@@ -108,6 +120,10 @@ if __name__ == '__main__':
         action='store_true',
         help='output a full HTML document with CSS, for easy previewing'
     )
+    parser.add_argument(
+        '--spellchoice', default='orig', choices=['orig', 'reg-spanish', 'reg-spacing']
+    )
+    parser.add_argument('--abbrchoice', default='abbr', choices=['abbr', 'expan'])
     args = parser.parse_args()
 
     # Infer the output path, if not given.
@@ -126,5 +142,11 @@ if __name__ == '__main__':
 
     # Run the conversion.
     convert_tei_file(
-        args.infile, outfile, xslt_file, flex_file=args.flex, with_css=args.with_css
+        args.infile,
+        outfile,
+        xslt_file,
+        flex_file=args.flex,
+        with_css=args.with_css,
+        abbrchoice=args.abbrchoice,
+        spellchoice=args.spellchoice,
     )
