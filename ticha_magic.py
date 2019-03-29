@@ -5,8 +5,8 @@ Convert TEI-encoded XML into human-readable HTML.
 The conversion process goes through the following steps:
 
     XML -> pseudo-HTML
-      XML becomes pseudo-HTML (mostly HTML, but with the TEI <pb/> tags because it is too
-      hard to turn these into <div>...</div> using XSLT).
+      XML becomes pseudo-HTML (mostly HTML, but with the TEI <pb/> tags because it is
+      too hard to turn these into <div>...</div> using XSLT).
 
     pseudo-HTML -> HTML
       Pseudo-HTML becomes real HTML, by fixing the <pb/> tags.
@@ -14,10 +14,12 @@ The conversion process goes through the following steps:
     HTML -> HTML with FLEx (optional)
       FLEx insertions from a separate XML file are inserted into the HTML.
 
-Use `convert_tei_file` or `convert_tei_data` to carry out the entire conversion in one fell swoop.
-You can also invoke the intermediate functions `convert_tei_to_html`, `paginate`, and `flexify`, but
-note that for the sake of efficiency these only take XML/HTML trees as arguments, not strings or
-files.
+Use `convert_tei_file` or `convert_tei_data` to carry out the entire conversion in one
+fell swoop.
+
+You can also invoke the intermediate functions `convert_tei_to_html`, `paginate`, and
+`flexify`, but note that for the sake of efficiency these only take XML/HTML trees as
+arguments, not strings or files.
 """
 import argparse
 import os
@@ -31,15 +33,16 @@ from common import get_xslt_file, get_output_file
 
 def convert_tei_file(xml_file, out_file, xslt_file, *, flex_file='', with_css=False):
     """
-    Read a TEI-encoded XML document, convert it to HTML, and write the HTML data to the output file.
+    Read a TEI-encoded XML document, convert it to HTML, and write the HTML data to the
+    output file.
 
-      xml_file: The path to a TEI-encoded XML document.
+      xml_file:  The path to a TEI-encoded XML document.
       html_file: The path to a file to which the HTML data will be written.
       xslt_file: The path to the XSLT stylesheet to be used in the conversion.
-      flex_file: If provided, the path to the FLEx XML export containing annotations to be inserted
-                 into the HTML.
-      with_css: If true, then the output file will be a full HTML document with links to the
-                stylesheets used on the Ticha website.
+      flex_file: If provided, the path to the FLEx XML export containing annotations to
+                 be inserted into the HTML.
+      with_css:  If true, then the output file will be a full HTML document with links
+                 to the stylesheets used on the Ticha website.
 
     See the module docstring for details on the conversion process.
     """
@@ -79,8 +82,8 @@ WITH_CSS_TEMPLATE = """\
 
 def convert_tei_data(xml_data, xslt_file, *, flex_file=''):
     """
-    Convert XML data (as a string) into HTML data (as a string). `xslt_file` and `flex_file` are the
-    same as in convert_tei_file.
+    Convert XML data (as a string) into HTML data (as a string). `xslt_file` and
+    `flex_file` are the same as in convert_tei_file.
     """
     xml_root = etree.XML(bytes(xml_data, encoding='utf-8'))
     pseudo_html_root = convert_tei_to_html(xml_root, xslt_file, abbrchoice='abbr',
@@ -95,10 +98,16 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('infile')
     parser.add_argument('-o', '--outfile', help='output file to write to')
-    parser.add_argument('-f', '--flex', default='', help='path to JSON file with FLEx annotations')
+    parser.add_argument(
+        '-f', '--flex', default='', help='path to JSON file with FLEx annotations'
+    )
     parser.add_argument('-x', '--xslt', help='path to custom XSLT file to use for conversion')
-    parser.add_argument('-w', '--with-css', action='store_true',
-                        help='output a full HTML document with CSS, for easy previewing')
+    parser.add_argument(
+        '-w',
+        '--with-css',
+        action='store_true',
+        help='output a full HTML document with CSS, for easy previewing'
+    )
     args = parser.parse_args()
 
     # Infer the output path, if not given.
@@ -116,4 +125,6 @@ if __name__ == '__main__':
         print('Inferred XSLT file', xslt_file)
 
     # Run the conversion.
-    convert_tei_file(args.infile, outfile, xslt_file, flex_file=args.flex, with_css=args.with_css)
+    convert_tei_file(
+        args.infile, outfile, xslt_file, flex_file=args.flex, with_css=args.with_css
+    )

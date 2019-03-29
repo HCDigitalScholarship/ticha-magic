@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """
-Convert XML exports from FieldWorks Language Explorer (FLEx) to a more compact and simple JSON
-format that the TEI FLEx inserter can use.
+Convert XML exports from FieldWorks Language Explorer (FLEx) to a more compact and
+simple JSON format that the TEI FLEx inserter can use.
 
-The JSON output is an object whose keys are the Zapotec words and whose values have the form
+The JSON output is an object whose keys are the Zapotec words and whose values have the
+form
 
   [
     {
@@ -13,14 +14,14 @@ The JSON output is an object whose keys are the Zapotec words and whose values h
         "morphs": [str],
         "lex_glosses": [str],
         "en_gloss": str
-       } 
+       }
     },
     ...
   ]
 
-where `section` is the section in the text where the word appears and `flex` contains enough info
-to construct an annotation as an HTML element. Each value is a list because a single word may have
-multiple annotations in different sections.
+where `section` is the section in the text where the word appears and `flex` contains
+enough info to construct an annotation as an HTML element. Each value is a list because
+a single word may have multiple annotations in different sections.
 """
 import argparse
 import os
@@ -41,13 +42,13 @@ def convert_flex_to_json(infile, outfile):
 
 def convert_flex_data_to_json(data):
     """
-    Same as convert_flex_to_json, but takes a string argument and returns a dictionary (see the
-    module docstring for a description of the dictionary's format).
+    Same as convert_flex_to_json, but takes a string argument and returns a dictionary
+    (see the module docstring for a description of the dictionary's format).
     """
     ret = defaultdict(list)
     tr = etree.fromstring(data)
-    # NOTE: This findall call relies on all the <interlinear-text> elements being direct children of
-    # the root element.
+    # NOTE: This findall call relies on all the <interlinear-text> elements being direct
+    # children of the root element.
     for text_element in tr.findall('interlinear-text'):
         text_name = get_text_name(text_element)
         for word_element in text_element.findall('.//phrases/word'):
@@ -77,7 +78,9 @@ def make_flex_object(flex_xml):
     lex_glosses = find_all_items(flex_xml, 'gls')
     # Get the literal English gloss.
     en_gloss = find_item(flex_xml, 'lit')
-    return {'name': name, 'morphs': morphs, 'lex_glosses': lex_glosses, 'en_gloss': en_gloss}
+    return {
+        'name': name, 'morphs': morphs, 'lex_glosses': lex_glosses, 'en_gloss': en_gloss
+    }
 
 
 def make_table_row(entries):
@@ -86,8 +89,9 @@ def make_table_row(entries):
 
 def find_item(parent, child_type):
     """
-    Find the first <item> descendant of the parent element with a matching type attribute and
-    return its text. If the first matching element has no text, the empty string is returned.
+    Find the first <item> descendant of the parent element with a matching type
+    attribute and return its text. If the first matching element has no text, the empty
+    string is returned.
     """
     child = parent.find(".//item[@type='%s']" % child_type)
     if child is not None:
@@ -98,8 +102,9 @@ def find_item(parent, child_type):
 
 def find_all_items(parent, child_type):
     """
-    Find the all <item> descendants of the parent element with a matching type attribute and
-    return their texts as a list. <item> elements with no text appear in the list as empty strings.
+    Find the all <item> descendants of the parent element with a matching type attribute
+    and return their texts as a list. <item> elements with no text appear in the list as
+    empty strings.
     """
     children = parent.findall(".//morph/item[@type='%s']" % child_type)
     children_texts = [(child.text if child.text else '') for child in children]

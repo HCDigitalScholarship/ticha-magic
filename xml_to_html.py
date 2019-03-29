@@ -9,10 +9,12 @@ from common import tag_eq
 
 
 def convert_tei_to_html(xml_root, xslt_file, textname='', **kwargs):
-    """Apply the XSLT stylesheet to the TEI-encoded XML document, but do not paginate."""
+    """
+    Apply the XSLT stylesheet to the TEI-encoded XML document, but do not paginate.
+    """
     xslt_transform = etree.XSLT(etree.parse(xslt_file).getroot())
-    # Make sure that all of the keyword arguments are string-encoded, because we're about to pass
-    # them to the XSLT stylesheet.
+    # Make sure that all of the keyword arguments are string-encoded, because we're
+    # about to pass them to the XSLT stylesheet.
     for key, val in kwargs.items():
         if isinstance(val, str):
             kwargs[key] = etree.XSLT.strparam(val)
@@ -21,9 +23,9 @@ def convert_tei_to_html(xml_root, xslt_file, textname='', **kwargs):
 
 def paginate(pseudo_html_root, text_name):
     """
-    Paginate the output of convert_tei_to_html. This entails removing all <pb/> elements and
-    adding <div class="page">...</div> elements to wrap each page. The output of this function is
-    valid HTML.
+    Paginate the output of convert_tei_to_html. This entails removing all <pb/> elements
+    and adding <div class="page">...</div> elements to wrap each page. The output of
+    this function is valid HTML.
     """
     handler = TEIPager(text_name)
     sax.saxify(pseudo_html_root, handler)
@@ -32,23 +34,24 @@ def paginate(pseudo_html_root, text_name):
 
 class AugmentedContentHandler(sax.ElementTreeContentHandler):
     """
-    Augment the lxml implementation to support better error messages and provide the useful
-    (though namespace-unaware) startElement and endElement methods.
+    Augment the lxml implementation to support better error messages and provide the
+    useful (though namespace-unaware) startElement and endElement methods.
 
-    This class doesn't do anything interesting itself other than provide the above services to
-    TEIPager, which is a subclass.
+    This class doesn't do anything interesting itself other than provide the above
+    services to TEIPager, which is a subclass.
     """
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # The real tag stack keeps track of the actual tags that are currently open. It is used to
-        # print more helpful error messages.
+        # The real tag stack keeps track of the actual tags that are currently open. It
+        # is used to print more helpful error messages.
         self.real_tag_stack = []
 
     def startElement(self, name, attributes=None):
-        # In vanilla lxml.sax, every attribute is a (namespace, key) pair, which is a little
-        # annoying to have to write every time when you're not using a namespace. This function
-        # takes a regular dictionary and adds the empty namespace to every attribute.
+        # In vanilla lxml.sax, every attribute is a (namespace, key) pair, which is a
+        # little annoying to have to write every time when you're not using a namespace.
+        # This function takes a regular dictionary and adds the empty namespace to every
+        # attribute.
         if attributes is not None:
             attributes = {(None, key): val for key, val in attributes.items()}
         AugmentedContentHandler.startElementNS(self, (None, name), name, attributes)
@@ -75,14 +78,14 @@ class AugmentedContentHandler(sax.ElementTreeContentHandler):
 
 class TEIPager(AugmentedContentHandler):
     """
-    A SAX parser that transforms <pb/> and <cb/> tags into <div>s that wrap pages and columns,
-    respectively.
+    A SAX parser that transforms <pb/> and <cb/> tags into <div>s that wrap pages and
+    columns, respectively.
     """
 
     def __init__(self, text_name, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # The tag stack is a stack of (ns_name, qname, attributes) tuples that represent the current
-        # path in the tree.
+        # The tag stack is a stack of (ns_name, qname, attributes) tuples that represent
+        # the current path in the tree.
         self.tag_stack = []
         self.page = 0
         self.line = 1
@@ -135,7 +138,8 @@ class TEIPager(AugmentedContentHandler):
             self.startElement('div', {'class': 'col-xs-6'})
 
     def endElementNS(self, ns_name, qname):
-        # Ignore self-closing <pb> and <cb> tags; they were already handled by startElementNS.
+        # Ignore self-closing <pb> and <cb> tags; they were already handled by
+        # startElementNS.
         if tag_eq(qname, 'body'):
             self.endElement('div')
             self.endElement('div')
@@ -144,7 +148,9 @@ class TEIPager(AugmentedContentHandler):
             try:
                 super().endElementNS(ns_name, qname)
             except sax.SaxError as e:
-                raise sax.SaxError(str(e) + 'on page {0.page}, line {0.line}'.format(self)) from e
+                raise sax.SaxError(
+                    str(e) + 'on page {0.page}, line {0.line}'.format(self)
+                ) from e
 
     def closeAllTags(self):
         for ns_name, qname, _ in reversed(self.tag_stack):

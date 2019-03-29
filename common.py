@@ -7,13 +7,17 @@ def tag_eq(tag_in_document, tag_to_check):
     """
     Compare equality of tags ignoring namespaces.
 
-      tag_in_document: the value of a tag encountered while parsing a document, which may begin
-        with a namespace.
-      tag_to_check: an XML/HTML tag as a literal string which MAY NOT begin with a namespace.
+      tag_in_document: the value of a tag encountered while parsing a document, which
+                       may begin with a namespace.
+
+      tag_to_check: an XML/HTML tag as a literal string which MAY NOT begin with a
+                    namespace.
 
     Note that this is not commutative.
     """
-    return tag_in_document == tag_to_check or tag_in_document.endswith(':' + tag_to_check)
+    return tag_in_document == tag_to_check or tag_in_document.endswith(
+        ':' + tag_to_check
+    )
 
 
 def get_output_file(input_file):
@@ -33,13 +37,37 @@ def get_xslt_file(input_file):
 
 def strip_accents_and_spaces(s):
     """
-    Remove whitespace, punctuation and accents from accented characters in s, convert to lowercase,
-    and remove letters in between square brackets.
+    Remove whitespace, punctuation and accents from accented characters in s, convert to
+    lowercase, and remove letters in between square brackets.
     """
     accent_dict = {
-        'ǎ': 'a', 'ã': 'a', 'á': 'a', 'ä': 'a', 'à': 'a', 'ã': 'a', 'ā': 'a', 'é': 'e', 'ě': 'e',
-        'è': 'e', 'ē': 'e', 'ï': 'i', 'í': 'i', 'î': 'i', 'ì': 'i', 'ó': 'o', 'ö': 'o', 'ǒ': 'o',
-        'ô': 'o', 'õ': 'o', 'q̃': 'q', 'q̃̃': 'q', 'q~': 'que', 'ſ': 's', 'û': 'u', 'ǔ': 'u', 'ú': 'u'
+        'ǎ': 'a',
+        'ã': 'a',
+        'á': 'a',
+        'ä': 'a',
+        'à': 'a',
+        'ã': 'a',
+        'ā': 'a',
+        'é': 'e',
+        'ě': 'e',
+        'è': 'e',
+        'ē': 'e',
+        'ï': 'i',
+        'í': 'i',
+        'î': 'i',
+        'ì': 'i',
+        'ó': 'o',
+        'ö': 'o',
+        'ǒ': 'o',
+        'ô': 'o',
+        'õ': 'o',
+        'q̃': 'q',
+        'q̃̃': 'q',
+        'q~': 'que',
+        'ſ': 's',
+        'û': 'u',
+        'ǔ': 'u',
+        'ú': 'u',
     }
     for key, val in accent_dict.items():
         s = s.replace(key, val)

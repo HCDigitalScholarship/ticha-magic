@@ -1,6 +1,7 @@
 """
-Insert FLEx annotations into HTML. Works on the output of the pseudo-HTML -> HTML stage in the
-ticha_magic converter. Users of this library should only use the flexify() function.
+Insert FLEx annotations into HTML. Works on the output of the pseudo-HTML -> HTML stage
+in the ticha_magic converter. Users of this library should only use the flexify()
+function.
 """
 import json
 from contextlib import contextmanager
@@ -24,11 +25,12 @@ class FLExParser(sax.ElementTreeContentHandler):
     """
     This parser adds the FLEx data to every Zapotec word contained in a <mark> tag.
 
-    The reason it uses SAX parsing is that it needs to give each <mark> tag a new <span> parent tag,
-    which is difficult to do with a DOM parser but relatively simple with a SAX one.
+    The reason it uses SAX parsing is that it needs to give each <mark> tag a new <span>
+    parent tag, which is difficult to do with a DOM parser but relatively simple with a
+    SAX one.
 
-    Note that this parser will not preserve HTML comments, processing instructions, or anything else
-    that is not a tag or text.
+    Note that this parser will not preserve HTML comments, processing instructions, or
+    anything else that is not a tag or text.
     """
 
     def __init__(self, flex_dict, *args, **kwargs):
@@ -41,13 +43,17 @@ class FLExParser(sax.ElementTreeContentHandler):
         self.word, self.section = '', ''
 
     def startElement(self, tag, attributes=None):
-        """A helper function that wraps startElementNS, without bothering with namespaces."""
+        """
+        A helper function that wraps startElementNS, without bothering with namespaces.
+        """
         if attributes:
             attributes = {(None, key): val for key, val in attributes.items()}
         super().startElementNS((None, tag), tag, attributes)
 
     def endElement(self, tag):
-        """A helper function that wraps endElementNS, without bothering with namespaces."""
+        """
+        A helper function that wraps endElementNS, without bothering with namespaces.
+        """
         super().endElementNS((None, tag), tag)
 
     @contextmanager
@@ -95,8 +101,8 @@ class FLExParser(sax.ElementTreeContentHandler):
         with self.E('table'):
             with self.E('caption'):
                 super().characters(name)
-            # If at least one morph and at least one gloss item is non-empty, add the whole list to
-            # the table.
+            # If at least one morph and at least one gloss item is non-empty, add the
+            # whole list to the table.
             if any(morphs) and any(lex_glosses):
                 self.createTableRow(morphs)
                 self.createTableRow(lex_glosses)
@@ -118,8 +124,9 @@ class FLExParser(sax.ElementTreeContentHandler):
 
 def lookup(flex_dict, word, section):
     """
-    Look up a word that appears in a certain section of the text in the FLEx dictionary. Return
-    the word as a JSON object (see the docstring of flexml_to_json.py for the exact format).
+    Look up a word that appears in a certain section of the text in the FLEx dictionary.
+    Return the word as a JSON object (see the docstring of flexml_to_json.py for the
+    exact format).
     """
     word = strip_accents_and_spaces(word)
     best_match = ''
@@ -128,9 +135,9 @@ def lookup(flex_dict, word, section):
         found_section = found_word['section']
         if found_section == section:
             return found_word['flex']
-        # Sometimes the sections in the actual text are more precise than the ones in the FLEx
-        # export (i.e. the text will list 2.3.1.4 while the FLEx will only have 2.3) so we look for
-        # sections that partially match.
+        # Sometimes the sections in the actual text are more precise than the ones in
+        # the FLEx export (i.e. the text will list 2.3.1.4 while the FLEx will only have
+        # 2.3) so we look for sections that partially match.
         elif section.startswith(found_section):
             if len(found_section) > len(best_match):
                 best_match = found_section

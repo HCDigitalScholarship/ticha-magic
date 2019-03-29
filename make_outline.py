@@ -10,9 +10,9 @@ The TEI documents contain sections that are structured like so:
       ...
     </div>
 
-The outline builder reads through the TEI and combines the section number in the <div> tag with the
-section title in the <head> tag. It outputs the outline in a nice HTML format that can be pasted
-into a web page.
+The outline builder reads through the TEI and combines the section number in the <div>
+tag with the section title in the <head> tag. It outputs the outline in a nice HTML
+format that can be pasted into a web page.
 """
 import xml.etree.ElementTree as ET
 import os
@@ -23,9 +23,9 @@ from collections import namedtuple
 
 def xml_to_outline(data, text_name):
     """
-    Given XML data as a string, return an HTML outline as a string. text_name is used to construct
-    URLs in the outline, so it should be the short name of the text as it is displayed in URLs on
-    the Ticha site.
+    Given XML data as a string, return an HTML outline as a string. text_name is used to
+    construct URLs in the outline, so it should be the short name of the text as it is
+    displayed in URLs on the Ticha site.
     """
     target = OutlineBuilder(text=text_name)
     parser = ET.XMLParser(target=target)
@@ -38,16 +38,17 @@ known_namespaces = ['', 'http://www.tei-c.org/ns/1.0']
 
 def tag_eq(tag, tagname):
     """
-    Return True if the tags are equal regardless of namespace. `tagname` should be a constant string
-    with no namespace prefix, e.g. 'div'.
+    Return True if the tags are equal regardless of namespace. `tagname` should be a
+    constant string with no namespace prefix, e.g. 'div'.
     """
     return tag == tagname or any(tag == '{%s}%s' % (ns, tagname) for ns in known_namespaces)
 
 
 def find_attr(attrs, attrname):
     """
-    Compute attrs.get(attrname), except do not consider namespaces when looking for matches in the
-    dictionary, so find_attr(attrs, 'type') and find_attr('{...}type') are equivalent.
+    Compute attrs.get(attrname), except do not consider namespaces when looking for
+    matches in the dictionary, so find_attr(attrs, 'type') and find_attr('{...}type')
+    are equivalent.
     """
     for key in attrs:
         if key == attrname or any(key == '{%s}%s' % (ns, attrname) for ns in known_namespaces):
@@ -65,7 +66,8 @@ class OutlineBuilder(ET.TreeBuilder):
         self.page = first_page
         self.in_progress = None
         self.get_title = False
-        # self.number is always a list of strings, e.g. ['1', '2', '7'] for section 1.2.7
+        # self.number is always a list of strings, e.g. ['1', '2', '7'] for section
+        # 1.2.7
         self.number = ['1']
         super().start('div', {'class': 'index'})
         super().start('ul')
@@ -102,7 +104,8 @@ class OutlineBuilder(ET.TreeBuilder):
 
     def write_section(self):
         if self.in_progress is not None:
-            # check if any nested lists need to be opened/closed based on the section number
+            # Check if any nested lists need to be opened/closed based on the section
+            # number.
             how_many_to_close = len(self.number) - len(self.in_progress.number)
             if how_many_to_close > 0:
                 for i in range(how_many_to_close):
@@ -118,14 +121,17 @@ class OutlineBuilder(ET.TreeBuilder):
             super().start('li')
             super().start('a', {'href': self.make_url()})
             # i.e., 1.3.1 Licencia
-            super().data('.'.join(self.in_progress.number) + ' ' + self.in_progress.title)
+            super().data(
+                '.'.join(self.in_progress.number) + ' ' + self.in_progress.title
+            )
             super().end('a')
             super().end('li')
             self.number = self.in_progress.number
 
     def make_url(self):
-        return 'https://ticha.haverford.edu/en/texts/{}/{}/original'.format(self.text,
-            self.in_progress.page)
+        return 'https://ticha.haverford.edu/en/texts/{}/{}/original'.format(
+            self.text, self.in_progress.page
+        )
 
 
 def infer_text_name(infile):
@@ -151,7 +157,9 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('infile', help='XML file to read from')
     parser.add_argument('-o', '--outfile', nargs='?', help='file to write outline to')
-    parser.add_argument('-t', '--text', nargs='?', help='short name of text, i.e. "levanto-arte".')
+    parser.add_argument(
+        '-t', '--text', nargs='?', help='short name of text, i.e. "levanto-arte".'
+    )
     args = parser.parse_args()
 
     if args.outfile:
