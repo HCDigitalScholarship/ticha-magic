@@ -1,8 +1,3 @@
 #!/bin/bash
 
-if [[ $# != 2 ]]; then
-  echo "Usage: $0 <path-to-file>"
-  exit
-fi
-
-python3 tei_to_html.py $@ --xslt xslt/arte.xslt -o cordova_arte
+python3 tei_to_html.py $@ --xslt xslt/arte.xslt --flex flex_export.json -o cordova_arte
