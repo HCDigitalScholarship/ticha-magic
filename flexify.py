@@ -10,9 +10,9 @@ from lxml import sax
 from common import strip_accents_and_spaces
 
 
-def flexify(html_root, flex_file):
+def flexify(html_root, flex_path):
     """Insert FLEx annotations after every Zapotec word in the HTML root element."""
-    with open(flex_file, 'r', encoding='utf-8') as f:
+    with open(flex_path, 'r', encoding='utf-8') as f:
         flex_dict = json.load(f)
     print('{} words in the FLEx dictionary'.format(len(flex_dict)))
     handler = FLExParser(flex_dict)
