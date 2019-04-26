@@ -1,0 +1,3 @@
+#!/bin/bash
+
+python3 tei_to_html.py $@ --xslt xslt/levanto_arte.xslt -o levanto_arte
