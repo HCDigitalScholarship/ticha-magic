@@ -1,5 +1,12 @@
 Tools for manipulating TEI-encoded documents on the [Ticha](https://ticha.haverford.edu) project.
 
+Workflow:
+```shell
+$ ./tei_to_html a.xml -t cordova-arte
+$ ./tei_to_html a.xml -t levanto-arte
+$ ./tei_to_html a.xml -t levanto-catechismo
+```
+
 The `ticha_magic` library can
   - Convert a TEI-encoded XML file into HTML.
   - Make an HTML outline out of a TEI document.
@@ -9,47 +16,6 @@ The `ticha_magic` library can
 **Please note**: The scripts in this repository have only been tested against the TEI documents
 produced by the Ticha project at Haverford, and will likely not work as expected or at all for
 other TEI documents.
-
-
-## Workflow
-To convert an XML document to HTML:
-
-```bash
-$ ./ticha_magic cordova_arte.xml # output in cordova_arte.html
-```
-
-To specify a specific output file (otherwise, the output file is inferred from the name of the input
-file):
-
-```bash
-$ ./ticha_magic cordova_arte.xml -o output.html
-```
-
-To insert FLEx annotations after HTML conversion:
-
-```bash
-$ ./flexml_to_json.py flex_export_from_brook.xml # create the JSON file
-$ ./ticha_magic cordova_arte.xml -f flex_export_from_brook.json
-```
-
-To specify a custom XSLT file (otherwise, the proper XSLT file is inferred from the name of the
-input file, defaulting to `xslt/base.xslt`):
-
-```bash
-$ ./ticha_magic cordova_arte.xml -x xslt/custom_arte.xslt
-```
-
-To see more options, run `./ticha_magic --help`.
-
-You can also instantly preview a text like this:
-
-```bash
-$ ./preview cordova_arte.xml
-```
-
-The `preview` script should open up the HTML document in your default web browser, with mostly the
-same CSS and page layout as on the actual Ticha site. The script takes all the same arguments as
-`ticha_magic`, except you shouldn't pass it `-o` because it sets its own output file.
 
 
 ## Technical details
@@ -75,10 +41,4 @@ following:
 The first two bullet points are handled by our [XSLT](https://en.wikipedia.org/wiki/XSLT)
 stylesheets in the `xslt` folder.
 
-The last two bullet points are handled by the Python code in `ticha_magic.py`. Pagination and FLEx
-insertion are done with SAX parsers because they have to do tree insertions that are difficult to
-accomplish with DOM parsers. The details of their implementations are documented in the source code.
-
-### TEI to outline
-Making an outline from a TEI document is straightforward compared to converting it to HTML. See
-the `make_outline.py` script for details.
+Pagination and FLEx insertion are done with SAX parsers because they have to do tree insertions that are difficult to accomplish with DOM parsers. The details of their implementations are documented in the source code.
