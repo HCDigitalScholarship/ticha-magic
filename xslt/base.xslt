@@ -21,7 +21,7 @@
 
   <!-- Handle <choice> elements with the $spellchoice and $abbrchoice parameters -->
   <xsl:template match="tei:orig">
-    <xsl:if test="$spellchoice = 'orig'">
+    <xsl:if test="$spellchoice = 'orig' or ($spellchoice = 'reg-spanish' and not(../tei:reg[@type='spanish'])) or ($spellchoice = 'reg-spacing' and not(../tei:reg[@type='spacing']))">
       <xsl:apply-templates/>
     </xsl:if>
   </xsl:template>

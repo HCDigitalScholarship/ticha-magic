@@ -36,10 +36,10 @@ def convert_tei_file(
     out_file,
     xslt_file,
     *,
-    flex_file='',
+    flex_file="",
     with_css=False,
-    abbrchoice='abbr',
-    spellchoice='orig'
+    abbrchoice="abbr",
+    spellchoice="orig"
 ):
     """
     Read a TEI-encoded XML document, convert it to HTML, and write the HTML data to the
@@ -55,11 +55,17 @@ def convert_tei_file(
 
     See the module docstring for details on the conversion process.
     """
-    with open(xml_file, 'r', encoding='utf-8') as ifsock:
-        with open(out_file, 'w', encoding='utf-8') as ofsock:
-            html_data = convert_tei_data(ifsock.read(), xslt_file, flex_file=flex_file)
+    with open(xml_file, "r", encoding="utf-8") as ifsock:
+        with open(out_file, "w", encoding="utf-8") as ofsock:
+            html_data = convert_tei_data(
+                ifsock.read(),
+                xslt_file,
+                abbrchoice=abbrchoice,
+                spellchoice=spellchoice,
+                flex_file=flex_file,
+            )
             if with_css:
-                print('Adding CSS links and HTML shell')
+                print("Adding CSS links and HTML shell")
                 html_data = WITH_CSS_TEMPLATE.format(html_data)
             ofsock.write(html_data)
 
@@ -90,40 +96,42 @@ WITH_CSS_TEMPLATE = """\
 
 
 def convert_tei_data(
-    xml_data, xslt_file, *, abbrchoice='abbr', spellchoice='orig', flex_file=''
+    xml_data, xslt_file, *, abbrchoice="abbr", spellchoice="orig", flex_file=""
 ):
     """
     Convert XML data (as a string) into HTML data (as a string). `xslt_file` and
     `flex_file` are the same as in convert_tei_file.
     """
-    xml_root = etree.XML(bytes(xml_data, encoding='utf-8'))
+    xml_root = etree.XML(bytes(xml_data, encoding="utf-8"))
     pseudo_html_root = convert_tei_to_html(
         xml_root, xslt_file, abbrchoice=abbrchoice, spellchoice=spellchoice
     )
-    html_root = paginate(pseudo_html_root, '')
+    html_root = paginate(pseudo_html_root, "")
     if flex_file:
         html_root = flexify(html_root, flex_file)
-    return etree.tostring(html_root, method='xml', encoding='unicode')
+    return etree.tostring(html_root, method="xml", encoding="unicode")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('infile')
-    parser.add_argument('-o', '--outfile', help='output file to write to')
+    parser.add_argument("infile")
+    parser.add_argument("-o", "--outfile", help="output file to write to")
     parser.add_argument(
-        '-f', '--flex', default='', help='path to JSON file with FLEx annotations'
-    )
-    parser.add_argument('-x', '--xslt', help='path to custom XSLT file to use for conversion')
-    parser.add_argument(
-        '-w',
-        '--with-css',
-        action='store_true',
-        help='output a full HTML document with CSS, for easy previewing'
+        "-f", "--flex", default="", help="path to JSON file with FLEx annotations"
     )
     parser.add_argument(
-        '--spellchoice', default='orig', choices=['orig', 'reg-spanish', 'reg-spacing']
+        "-x", "--xslt", help="path to custom XSLT file to use for conversion"
     )
-    parser.add_argument('--abbrchoice', default='abbr', choices=['abbr', 'expan'])
+    parser.add_argument(
+        "-w",
+        "--with-css",
+        action="store_true",
+        help="output a full HTML document with CSS, for easy previewing",
+    )
+    parser.add_argument(
+        "--spellchoice", default="orig", choices=["orig", "reg-spanish", "reg-spacing"]
+    )
+    parser.add_argument("--abbrchoice", default="abbr", choices=["abbr", "expan"])
     args = parser.parse_args()
 
     # Infer the output path, if not given.
@@ -131,14 +139,14 @@ if __name__ == '__main__':
         outfile = args.outfile
     else:
         outfile = get_output_file(args.infile)
-        print('Inferred output file', outfile)
+        print("Inferred output file", outfile)
 
     # Infer the XSLT file, if not given.
     if args.xslt:
         xslt_file = args.xslt
     else:
         xslt_file = get_xslt_file(args.infile)
-        print('Inferred XSLT file', xslt_file)
+        print("Inferred XSLT file", xslt_file)
 
     # Run the conversion.
     convert_tei_file(
