@@ -2,9 +2,9 @@ Tools for manipulating TEI-encoded documents on the [Ticha](https://ticha.haverf
 
 Workflow:
 ```shell
-$ ./tei_to_html a.xml -t cordova-arte
-$ ./tei_to_html a.xml -t levanto-arte
-$ ./tei_to_html a.xml -t levanto-catechismo
+$ ./tei_to_html a.xml -t cordova_arte
+$ ./tei_to_html a.xml -t levanto_arte
+$ ./tei_to_html a.xml -t levanto_catechismo
 ```
 
 The `ticha_magic` library can
