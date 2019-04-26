@@ -1,4 +1,8 @@
+#!/usr/bin/env python3
 import argparse
+import xml.etree.ElementTree as ET
+from collections import namedtuple
+
 from lxml import etree, sax
 
 from common import tag_eq
@@ -13,31 +17,34 @@ ABBRCHOICE_ABBR = "abbr"
 ABBRCHOICE_EXPAN = "expan"
 
 
-def convert_tei_to_html(path, prefix, xslt_path, flex_path):
+def convert_tei_to_html(path, text, xslt_path, flex_path):
     # Generate the HTML of the original text.
     generate_html(
         path,
-        prefix + ".html",
+        text + ".html",
         xslt_path=xslt_path,
         flex_path=flex_path,
+        text=text,
         spellchoice=SPELLCHOICE_ORIG,
-        abbrchoice=ABBRCHOICE_ABBR
+        abbrchoice=ABBRCHOICE_ABBR,
     )
     # Generate the HTML of the regularized text.
     generate_html(
         path,
-        prefix + "_reg.html",
+        text + "_reg.html",
         xslt_path=xslt_path,
         flex_path=flex_path,
+        text=text,
         spellchoice=SPELLCHOICE_SPANISH,
         abbrchoice=ABBRCHOICE_ABBR,
     )
     # Generate the HTML of the original text, with CSS for previewing.
     generate_html(
         path,
-        prefix + ".html",
+        text + "_preview.html",
         xslt_path=xslt_path,
         flex_path=flex_path,
+        text=text,
         spellchoice=SPELLCHOICE_ORIG,
         abbrchoice=ABBRCHOICE_ABBR,
         preview=True,
@@ -45,19 +52,20 @@ def convert_tei_to_html(path, prefix, xslt_path, flex_path):
     # Generate the HTML of the regularized text, with CSS for previewing.
     generate_html(
         path,
-        prefix + "_reg.html",
+        text + "_reg_preview.html",
         xslt_path=xslt_path,
         flex_path=flex_path,
+        text=text,
         spellchoice=SPELLCHOICE_SPANISH,
         abbrchoice=ABBRCHOICE_ABBR,
         preview=True,
     )
     # Generate an HTML outline of the text.
-    generate_outline(path, prefix + "_outline.html")
+    generate_outline(path, text + "_outline.html", text=text)
 
 
 def generate_html(
-    path, opath, *, xslt_path, flex_path, spellchoice, abbrchoice, preview=False
+    path, opath, *, xslt_path, flex_path, text, spellchoice, abbrchoice, preview=False
 ):
     with open(path, "r", encoding="utf-8") as f:
         # TODO [2019-04-26]: Why is this bytes(...) nonsense necessary?
@@ -70,7 +78,7 @@ def generate_html(
         pseudo_html_root = xslt_transform(
             xml_root, abbrchoice=abbrchoice, spellchoice=spellchoice
         )
-        html_root = paginate(pseudo_html_root, "")
+        html_root = paginate(pseudo_html_root, text)
 
         if flex_path:
             html_root = flexify(html_root, flex_path)
@@ -83,8 +91,17 @@ def generate_html(
         f.write(htmlstr)
 
 
-def generate_outline(path, opath):
-    pass
+def generate_outline(path, opath, *, text):
+    with open(path, "r", encoding="utf-8") as f:
+        data = f.read()
+
+    target = OutlineBuilder(text=text)
+    parser = ET.XMLParser(target=target)
+    parser.feed(data)
+    root = target.close()
+
+    with open(opath, "w", encoding="utf-8") as f:
+        f.write(ET.tostring(root, encoding="unicode"))
 
 
 def paginate(pseudo_html_root, text_name):
@@ -230,6 +247,113 @@ class TEIPager(AugmentedContentHandler):
             super().startElementNS(ns_name, qname, attributes)
 
 
+KNOWN_NAMESPACES = ["", "http://www.tei-c.org/ns/1.0"]
+
+
+def outline_tag_eq(tag, tagname):
+    """
+    Return True if the tags are equal regardless of namespace. `tagname` should be a
+    constant string with no namespace prefix, e.g. 'div'.
+    """
+    return tag == tagname or any(
+        tag == "{%s}%s" % (ns, tagname) for ns in KNOWN_NAMESPACES
+    )
+
+
+def find_attr(attrs, attrname):
+    """
+    Compute attrs.get(attrname), except do not consider namespaces when looking for
+    matches in the dictionary, so find_attr(attrs, 'type') and find_attr('{...}type')
+    are equivalent.
+    """
+    for key in attrs:
+        if key == attrname or any(
+            key == "{%s}%s" % (ns, attrname) for ns in KNOWN_NAMESPACES
+        ):
+            return attrs[key]
+    return None
+
+
+Section = namedtuple("Section", ["number", "title", "page"])
+
+
+class OutlineBuilder(ET.TreeBuilder):
+    def __init__(self, *args, text="levanto", first_page=0, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.text = text
+        self.page = first_page
+        self.in_progress = None
+        self.get_title = False
+        # self.number is always a list of strings, e.g. ['1', '2', '7'] for section
+        # 1.2.7
+        self.number = ["1"]
+        super().start("div", {"class": "index"})
+        super().start("ul")
+
+    def start(self, tag, attrs):
+        if outline_tag_eq(tag, "pb") and find_attr(attrs, "type") != "pdf":
+            self.page += 1
+        elif outline_tag_eq(tag, "div"):
+            for key, value in attrs.items():
+                if key.endswith("id") and value.startswith(self.text):
+                    number = value[len(self.text) :].split(".")
+                    # Write the previous section.
+                    self.write_section()
+                    self.in_progress = Section(number, "", str(self.page))
+                    break
+        elif outline_tag_eq(tag, "head") and find_attr(attrs, "type") == "outline":
+            self.get_title = True
+
+    def end(self, tag):
+        if outline_tag_eq(tag, "head"):
+            self.get_title = False
+
+    def data(self, data):
+        if self.get_title:
+            if self.in_progress:
+                new_title = self.in_progress.title + data
+                self.in_progress = self.in_progress._replace(title=new_title)
+
+    def close(self):
+        self.write_section()
+        super().end("ul")
+        super().end("div")
+        return super().close()
+
+    def write_section(self):
+        if self.in_progress is not None:
+            # Check if any nested lists need to be opened/closed based on the section
+            # number.
+            how_many_to_close = len(self.number) - len(self.in_progress.number)
+            if how_many_to_close > 0:
+                for i in range(how_many_to_close):
+                    super().end("ul")
+            elif how_many_to_close < 0:
+                how_many_to_open = -how_many_to_close
+                for i in range(
+                    len(self.number), len(self.number) + how_many_to_open - 1
+                ):
+                    super().start("ul")
+                    super().start("li")
+                    super().data(".".join(self.in_progress.number[i:]))
+                    super().end("li")
+                super().start("ul", {"id": "section" + ".".join(self.number)})
+            super().start("li")
+            super().start("a", {"href": self.make_url()})
+            # i.e., 1.3.1 Licencia
+            super().data(
+                ".".join(self.in_progress.number) + " " + self.in_progress.title
+            )
+            super().end("a")
+            super().end("li")
+            self.number = self.in_progress.number
+
+    def make_url(self):
+        return "https://ticha.haverford.edu/en/texts/{}/{}/original".format(
+            self.text, self.in_progress.page
+        )
+
+
 PREVIEW_TEMPLATE = """\
 <!DOCTYPE html>
 <html lang="en">
@@ -264,11 +388,23 @@ PREVIEW_TEMPLATE = """\
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Convert a TEI-encoded text to HTML.")
     parser.add_argument("infile", help="Path to TEI file to convert")
-    parser.add_argument("-o", help="Prefix for output files")
-    parser.add_argument("--xslt", help="Path to XSLT stylesheet")
     parser.add_argument(
-        "--flex", default="", help="Path to FLEx export (either XML or JSON)"
+        "-t",
+        required=True,
+        choices=["levanto_arte", "levanto_catechismo", "cordova_arte"],
     )
     args = parser.parse_args()
 
-    print("Not implemented yet!")
+    if args.t == "levanto_arte":
+        xslt_path = "xslt/levanto_arte.xslt"
+        flex_path = ""
+    elif args.t == "levanto_catechismo":
+        xslt_path = "xslt/base.xslt"
+        flex_path = ""
+    elif args.t == "cordova_arte":
+        xslt_path = "xslt/arte.xslt"
+        flex_path = "flex_export.json"
+    else:
+        raise RuntimeError("unknown text name: " + args.t)
+
+    convert_tei_to_html(args.infile, args.t, xslt_path, flex_path)

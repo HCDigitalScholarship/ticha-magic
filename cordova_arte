@@ -1,3 +1,0 @@
-#!/bin/bash
-
-python3 tei_to_html.py $@ --xslt xslt/arte.xslt --flex flex_export.json -o cordova_arte
