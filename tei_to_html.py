@@ -5,7 +5,6 @@ from collections import namedtuple
 
 from lxml import etree, sax
 
-from common import tag_eq
 from flexify import flexify
 
 
@@ -247,9 +246,24 @@ class TEIPager(AugmentedContentHandler):
             super().startElementNS(ns_name, qname, attributes)
 
 
+def tag_eq(tag_in_document, tag_to_check):
+    """
+    Compare equality of tags ignoring namespaces.
+
+      tag_in_document: the value of a tag encountered while parsing a document, which
+                       may begin with a namespace.
+
+      tag_to_check: an XML/HTML tag as a literal string which MAY NOT begin with a
+                    namespace.
+
+    Note that this is not commutative.
+    """
+    return tag_in_document == tag_to_check or tag_in_document.endswith(
+        ':' + tag_to_check
+    )
+
+
 KNOWN_NAMESPACES = ["", "http://www.tei-c.org/ns/1.0"]
-
-
 def outline_tag_eq(tag, tagname):
     """
     Return True if the tags are equal regardless of namespace. `tagname` should be a

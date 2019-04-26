@@ -29,7 +29,7 @@ import json
 from collections import defaultdict
 from lxml import etree
 
-from common import strip_accents_and_spaces
+from flexify import strip_accents_and_spaces
 
 
 def convert_flex_to_json(infile, outfile):
