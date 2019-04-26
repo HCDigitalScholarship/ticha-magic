@@ -5,7 +5,12 @@ __pycache__
 *.swp
 .mypy_cache
 *.txt
+*~
+*.backup
+*.save
 *.json
+
+/old
 
 # This is automatically created by the test runner.
 failed_output.html
