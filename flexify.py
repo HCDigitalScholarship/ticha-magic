@@ -4,6 +4,7 @@ in the ticha_magic converter. Users of this library should only use the flexify(
 function.
 """
 import json
+import re
 from contextlib import contextmanager
 from lxml import sax
 
