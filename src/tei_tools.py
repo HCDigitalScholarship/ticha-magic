@@ -1,8 +1,7 @@
 import xml.etree.ElementTree as ET
 from collections import namedtuple
-
 from lxml import etree, sax
-
+import logging
 from .flexify import flexify
 
 
@@ -329,6 +328,7 @@ class OutlineBuilder(ET.TreeBuilder):
 
 
 def generate_outline(path, opath, *, text):
+    logging.debug(f"generating Outline for {text}")
     with open(path, "r", encoding="utf-8") as f:
         data = f.read()
 
@@ -342,6 +342,7 @@ def generate_outline(path, opath, *, text):
 
 
 def generate_html(tei_root, *, xslt_path, flex_path, text, spellchoice, abbrchoice):
+    logging.debug(f"generating HTML  spellchoice: {spellchoice}")
     xslt_transform = etree.XSLT(etree.parse(xslt_path).getroot())
     # Make sure that all of the keyword arguments are string-encoded, because we're
     # about to pass them to the XSLT stylesheet.

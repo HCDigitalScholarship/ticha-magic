@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import argparse
 from lxml import etree
+import logging
 
 from src import SPELLCHOICE_ORIG, ABBRCHOICE_ABBR, PREVIEW_TEMPLATE, TEXT_PARAMS
 from src import parse_xml_file, generate_html, generate_outline
@@ -41,12 +42,24 @@ parser.add_argument("infile", help="Path to TEI file to convert")
 parser.add_argument(
     "-t",
     required=True,
-    choices=list(TEXT_PARAMS.keys()),
+    choices=list(TEXT_PARAMS.keys())
 )
-
+parser.add_argument(
+    "-d",
+    "--debug",
+    action="store_true",
+    default=False
+)
 
 if __name__ == "__main__":
     args = parser.parse_args()
+
+    if args.debug:
+        logging.basicConfig(level=logging.DEBUG)
+    else:
+        logging.basicConfig(level=logging.INFO)
+
+    logging.debug("Started!")
 
     if args.t in TEXT_PARAMS:
         xslt_path = TEXT_PARAMS[args.t]["xslt_path"]
@@ -55,3 +68,5 @@ if __name__ == "__main__":
         raise RuntimeError("unknown text name: " + args.t)
 
     make_all_files(args.infile, args.t, xslt_path, flex_path)
+
+    logging.debug("Finished!")

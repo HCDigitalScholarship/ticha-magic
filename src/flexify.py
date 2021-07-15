@@ -6,16 +6,16 @@ function.
 import json
 from contextlib import contextmanager
 from lxml import sax
-
+import logging
 
 def flexify(html_root, flex_path):
     """Insert FLEx annotations after every Zapotec word in the HTML root element."""
     with open(flex_path, 'r', encoding='utf-8') as f:
         flex_dict = json.load(f)
-    print('{} words in the FLEx dictionary'.format(len(flex_dict)))
+    logger.info(f'{len(flex_dict)} words in the FLEx dictionary')
     handler = FLExParser(flex_dict)
     sax.saxify(html_root, handler)
-    print('Processed {0.total} word(s), missed {0.missed}'.format(handler))
+    print(f'Processed {handler.total} word(s), missed {handler.missed}')
     return handler.etree
 
 
