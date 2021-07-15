@@ -361,5 +361,4 @@ def generate_html(tei_root, *, xslt_path, flex_path, text, spellchoice, abbrchoi
 
 def parse_xml_file(path):
     with open(path, "r", encoding="utf-8") as f:
-        # TODO [2019-04-26]: Why is this bytes(...) nonsense necessary?
         return etree.XML(bytes(f.read(), encoding="utf-8"))
