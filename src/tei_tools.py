@@ -153,6 +153,9 @@ class TEIPager(AugmentedContentHandler):
         self.startElement("div", attrs)
 
     def handleColumnBreak(self, n):
+        lastTag = self.tag_stack[-1][1]
+        if not lastTag == "div":
+            raise sax.SaxError(f"Column break (<cb.../>) must be inside a <div> tag: page {self.page}, line {self.line}")
         if n == "1":
             # A value of '1' indicates start of column section.
             self.startElement("div")
