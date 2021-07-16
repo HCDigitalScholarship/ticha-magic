@@ -12,7 +12,7 @@ def flexify(html_root, flex_path):
     """Insert FLEx annotations after every Zapotec word in the HTML root element."""
     with open(flex_path, 'r', encoding='utf-8') as f:
         flex_dict = json.load(f)
-    logger.info(f'{len(flex_dict)} words in the FLEx dictionary')
+    logging.info(f'{len(flex_dict)} words in the FLEx dictionary')
     handler = FLExParser(flex_dict)
     sax.saxify(html_root, handler)
     print(f'Processed {handler.total} word(s), missed {handler.missed}')
