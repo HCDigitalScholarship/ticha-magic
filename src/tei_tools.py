@@ -3,6 +3,7 @@ from collections import namedtuple
 from lxml import etree, sax
 import logging
 from .flexify import flexify
+import re
 
 
 # Possible settings for the <choice> tag in TEI.
@@ -364,4 +365,13 @@ def generate_html(tei_root, *, xslt_path, flex_path, text, spellchoice, abbrchoi
 
 def parse_xml_file(path):
     with open(path, "r", encoding="utf-8") as f:
-        return etree.XML(bytes(f.read(), encoding="utf-8"))
+        xml_file = f.read()
+
+        # Condense each choice tag onto one line to eliminate whitespace
+        # this regex substitution matches choice tags (even across lines),
+        # captures the meaningful parts, and reassembles them without whitespace
+        regex = r'(<choice>)(?:\s|\n)*(<orig>.*?</orig>)(?:\s|\n)*(<reg type=(?:".*?"|\'.*?\')>.*?</reg>)(?:\s|\n)*(<reg type=(?:".*?"|\'.*?\')>.*?</reg>)?(?:\s|\n)*(</choice>)'
+        subst = "\\g<1>\\g<2>\\g<3>\\g<4>\\g<5>"
+        xml_cleaned = re.sub(regex, subst, xml_file, 0, re.IGNORECASE | re.MULTILINE)
+
+        return etree.XML(bytes(xml_cleaned, encoding="utf-8"))
