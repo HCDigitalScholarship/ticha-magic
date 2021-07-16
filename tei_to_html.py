@@ -3,26 +3,27 @@ import argparse
 from lxml import etree
 import logging
 
-from src import SPELLCHOICE_ORIG, ABBRCHOICE_ABBR, PREVIEW_TEMPLATE, TEXT_PARAMS
+from src import SPELLCHOICE_ORIG, SPELLCHOICE_SPANISH, ABBRCHOICE_ABBR, PREVIEW_TEMPLATE, TEXT_PARAMS
 from src import parse_xml_file, generate_html, generate_outline
 
 
 def make_all_files(path, text, xslt_path, flex_path):
     files_to_generate = [
-        ('', False),
-        ('_reg', False),
-        ('_preview', True),
-        ('_reg_preview', True)
+      # (suffix,         preview?,  regularized?)
+        ('',             False,     False),
+        ('_reg',         False,     True),
+        ('_preview',     True,      False),
+        ('_reg_preview', True,      True)
     ]
 
-    for suffix, preview in files_to_generate:
+    for suffix, preview, regularized in files_to_generate:
         tei_root = parse_xml_file(path)
         html_root = generate_html(
             tei_root,
             xslt_path=xslt_path,
             flex_path=flex_path,
             text=text,
-            spellchoice=SPELLCHOICE_ORIG,
+            spellchoice=SPELLCHOICE_SPANISH if regularized else SPELLCHOICE_ORIG,
             abbrchoice=ABBRCHOICE_ABBR,
         )
 
