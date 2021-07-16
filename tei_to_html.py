@@ -39,11 +39,13 @@ def make_all_files(path, text, xslt_path, flex_path):
 
 
 parser = argparse.ArgumentParser(description="Convert a TEI-encoded text to HTML.")
-parser.add_argument("infile", help="Path to TEI file to convert")
+parser.add_argument("infile", help="path to a TEI file to convert")
 parser.add_argument(
     "-t",
+    "-text",
     required=True,
-    choices=list(TEXT_PARAMS.keys())
+    choices=list(TEXT_PARAMS.keys()),
+    help="which text's formatting to use when converting"
 )
 parser.add_argument(
     "-d",
