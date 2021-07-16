@@ -7,6 +7,7 @@ import json
 from contextlib import contextmanager
 from lxml import sax
 import logging
+import re
 
 def flexify(html_root, flex_path):
     """Insert FLEx annotations after every Zapotec word in the HTML root element."""
