@@ -96,9 +96,9 @@ class AugmentedContentHandler(sax.ElementTreeContentHandler):
             super().endElementNS(ns_name, qname)
             self.real_tag_stack.pop()
         except sax.SaxError as e:
-            msg = "Tried to close <{}>".format(qname)
+            msg = f"Tried to close <{qname}>"
             if self.real_tag_stack:
-                msg += ", but last opened tag was <{}>".format(self.real_tag_stack[-1])
+                msg += f", but last opened tag was <{self.real_tag_stack[-1]}>. Tag stack: {self.real_tag_stack}"
             else:
                 msg += ", but no tags have been opened"
             raise sax.SaxError(msg) from e
@@ -177,7 +177,7 @@ class TEIPager(AugmentedContentHandler):
                 super().endElementNS(ns_name, qname)
             except sax.SaxError as e:
                 raise sax.SaxError(
-                    str(e) + "on page {0.page}, line {0.line}".format(self)
+                    str(e) + f"on page {self.page}, line {self.line}"
                 ) from e
 
     def closeAllTags(self):
