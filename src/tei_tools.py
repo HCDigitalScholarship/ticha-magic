@@ -362,16 +362,17 @@ def generate_html(tei_root, *, xslt_path, flex_path, text, spellchoice, abbrchoi
 
     return html_root
 
+def preprocess_xml(xml_string):
+    # Condense each choice tag onto one line to eliminate whitespace
+    # this regex substitution matches choice tags (even across lines),
+    # captures the meaningful parts, and reassembles them without whitespace
+    regex = r'(<choice>)(?:\s|\n)*(<orig>.*?</orig>)(?:\s|\n)*(<reg type=(?:".*?"|\'.*?\')>.*?</reg>)(?:\s|\n)*(<reg type=(?:".*?"|\'.*?\')>.*?</reg>)?(?:\s|\n)*(</choice>)'
+    subst = "\\g<1>\\g<2>\\g<3>\\g<4>\\g<5>"
+    xml_no_choice_whitespace = re.sub(regex, subst, xml_string, 0, re.IGNORECASE | re.MULTILINE)
+    return xml_no_choice_whitespace
 
 def parse_xml_file(path):
     with open(path, "r", encoding="utf-8") as f:
-        xml_file = f.read()
-
-        # Condense each choice tag onto one line to eliminate whitespace
-        # this regex substitution matches choice tags (even across lines),
-        # captures the meaningful parts, and reassembles them without whitespace
-        regex = r'(<choice>)(?:\s|\n)*(<orig>.*?</orig>)(?:\s|\n)*(<reg type=(?:".*?"|\'.*?\')>.*?</reg>)(?:\s|\n)*(<reg type=(?:".*?"|\'.*?\')>.*?</reg>)?(?:\s|\n)*(</choice>)'
-        subst = "\\g<1>\\g<2>\\g<3>\\g<4>\\g<5>"
-        xml_cleaned = re.sub(regex, subst, xml_file, 0, re.IGNORECASE | re.MULTILINE)
-
+        xml = f.read()
+        xml_cleaned = preprocess_xml(xml)
         return etree.XML(bytes(xml_cleaned, encoding="utf-8"))

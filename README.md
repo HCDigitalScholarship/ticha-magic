@@ -99,6 +99,7 @@ This section discussed the technical details for people who want to tinker with 
 ### TEI to HTML conversion
 Converting a TEI-encoded XML document into HTML that we can display on Ticha entails doing the following:
 
+- **Preprocessing the XML document.** When doing encoding in XML, using indentation is helpful for human encoders, but indentation is not ignored in XML. Regex preprocessing is done on the XML before it's parsed to remove whitespace within `<choice>` tags, which prevents this whitespace from "leaking" into the final HTML output.
 - **Converting TEI tags into HTML tags.** For example, `<lb/>` in TEI becomes `<br>` in HTML.
 - **Choosing what text to include.** Some of our TEI documents, like Cordova's Arte, have `<choice>` tags that encode both the original spelling in the document, and a rendition in regularized Spanish. There is also a choice between using the full spelling and abbreviations.
 - **Paginating the TEI document.** Page breaks are indicated in TEI by the `<pb/>` tag; these need to be converted into HTML `<div class="page">...</div>` elements that wrap each page. A similar transformation must be done for columns indicated by the `<cb/>` tag.
