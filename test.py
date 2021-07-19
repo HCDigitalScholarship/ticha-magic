@@ -10,7 +10,7 @@ class TestGenerateHTML(unittest.TestCase):
     def test_orig(self):
 
         tei_root = parse_xml_file('./tests/input.xml')
-        xslt_path = "./xslt/levanto_arte.xslt"
+        xslt_path = "./xslt/test.xslt"
         flex_path = "./tests/flex_export.json"
 
         html_root = generate_html(
@@ -33,7 +33,7 @@ class TestGenerateHTML(unittest.TestCase):
     def test_reg(self):
 
         tei_root = parse_xml_file('./tests/input.xml')
-        xslt_path = "./xslt/levanto_arte.xslt"
+        xslt_path = "./xslt/test.xslt"
         flex_path = "./tests/flex_export.json"
 
         html_root = generate_html(
