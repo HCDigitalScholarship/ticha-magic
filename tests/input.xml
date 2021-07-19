@@ -20,12 +20,17 @@
     <pb n="3"/>
     <foreign xml:lang="zap">pichina</foreign> (a Zapotec word)<lb/>
     <pb n="4"/>
+    <div>
     <cb n="1"/>
     This is in one column.
     <cb n="2"/>
     This is in the next column.
     <cb n=""/>
+    </div>
     This is below the two columns.
+    This is either Old Spanish or Modern Spanish: <choice><orig>Viſorey</orig>
+    <reg type="spanish">Virrey</reg>
+    </choice>. And there should be no whitespace in between it and the following period in either rendering.
 
     <div xml:id="levanto2">
       This word: <foreign xml:lang="zap">pichina</foreign> should be matched to a different FLEx

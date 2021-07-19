@@ -97,6 +97,7 @@ To publish an updated TEI-encoded document to Ticha:
 This section discussed the technical details for people who want to tinker with the code.
 
 ### TEI to HTML conversion
+
 Converting a TEI-encoded XML document into HTML that we can display on Ticha entails doing the following:
 
 - **Preprocessing the XML document.** When doing encoding in XML, using indentation is helpful for human encoders, but indentation is not ignored in XML. Regex preprocessing is done on the XML before it's parsed to remove whitespace within `<choice>` tags, which prevents this whitespace from "leaking" into the final HTML output.
@@ -108,3 +109,13 @@ Converting a TEI-encoded XML document into HTML that we can display on Ticha ent
 The first two bullet points are handled by our [XSLT](https://en.wikipedia.org/wiki/XSLT) stylesheets in the [`xslt` folder](xslt/).
 
 Pagination and FLEx insertion are done with SAX parsers because they have to do tree insertions that are difficult to accomplish with DOM parsers. The details of their implementations are documented in the source code.
+
+### Tests
+
+To run tests, from the root project directory, run
+
+```shell
+python3 test.py
+```
+
+The expected HTML outputs of the conversion are in the `tests` subdirectory. The test script runs conversion on `input.xml` and compares to these expected outputs. If you change the way something works, update tests to pass.
