@@ -346,7 +346,7 @@ def generate_outline(path, opath, *, text):
 
 
 def generate_html(tei_root, *, xslt_path, flex_path, text, spellchoice, abbrchoice):
-    logging.debug(f"generating HTML  spellchoice: {spellchoice}")
+    logging.debug(f"generating HTML! spellchoice: {spellchoice}")
     xslt_transform = etree.XSLT(etree.parse(xslt_path).getroot())
     # Make sure that all of the keyword arguments are string-encoded, because we're
     # about to pass them to the XSLT stylesheet.
@@ -358,6 +358,7 @@ def generate_html(tei_root, *, xslt_path, flex_path, text, spellchoice, abbrchoi
     html_root = paginate(pseudo_html_root, text)
 
     if flex_path:
+        logging.debug(f"Flexifying HTML using flex path {flex_path}")
         html_root = flexify(html_root, flex_path)
 
     return html_root
