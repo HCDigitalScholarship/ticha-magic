@@ -51,7 +51,9 @@ parser.add_argument(
     "-d",
     "--debug",
     action="store_true",
-    default=False
+    default=False,
+    help="print debugging output"
+
 )
 
 if __name__ == "__main__":
