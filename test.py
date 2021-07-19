@@ -53,6 +53,8 @@ class TestGenerateHTML(unittest.TestCase):
         self.assertEqual(generated_html_string, expected_html_string)
 
 
+class TestGenerateOutline(unittest.TestCase):
+
     def test_outline(self):
 
         text = "levanto_arte"
