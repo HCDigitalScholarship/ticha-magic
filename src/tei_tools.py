@@ -255,7 +255,7 @@ Section = namedtuple("Section", ["number", "title", "page"])
 
 
 class OutlineBuilder(ET.TreeBuilder):
-    def __init__(self, *args, text="levanto", first_page=0, **kwargs):
+    def __init__(self, *args, text, first_page=0, **kwargs):
         super().__init__(*args, **kwargs)
         self.text = text
         self.page = first_page
@@ -272,12 +272,15 @@ class OutlineBuilder(ET.TreeBuilder):
             self.page += 1
         elif outline_tag_eq(tag, "div"):
             for key, value in attrs.items():
-                if key.endswith("id") and value.startswith(self.text):
-                    number = value[len(self.text) :].split(".")
-                    # Write the previous section.
-                    self.write_section()
-                    self.in_progress = Section(number, "", str(self.page))
-                    break
+                if key.endswith("id"):
+                    if value.startswith(self.text):
+                        number = value[len(self.text) :].split(".")
+                        # Write the previous section.
+                        self.write_section()
+                        self.in_progress = Section(number, "", str(self.page))
+                        break
+                    else:
+                        logging.warning(f'WARNING! Found a <div> with the id attribute, but the start of its value ({value}) didn\'t match the current text ID ({self.text}) like I expected!')
         elif outline_tag_eq(tag, "head") and find_attr(attrs, "type") == "outline":
             self.get_title = True
 
