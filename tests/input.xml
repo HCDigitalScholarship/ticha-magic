@@ -1,6 +1,6 @@
 <TEI xmlns="http://www.tei-c.org/ns/1.0">
   <text>
-    <div xml:lang="esp" xml:id="levanto1">
+    <div xml:lang="esp" xml:id="levanto_arte1">
       <head>A header</head>
       <head type="outline">This should not show up in the HTML output.</head>
       <!-- A page break nested inside a div -->
@@ -32,7 +32,8 @@
     <reg type="spanish">Virrey</reg>
     </choice>. And there should be no whitespace in between it and the following period in either rendering.
 
-    <div xml:id="levanto2">
+    <div xml:id="levanto_arte2">
+      <head type="outline">And neither should this second header</head>
       This word: <foreign xml:lang="zap">pichina</foreign> should be matched to a different FLEx
       annotation since it's in a different section.
     </div>
