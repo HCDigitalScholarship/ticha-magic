@@ -329,9 +329,8 @@ class OutlineBuilder(ET.TreeBuilder):
             self.number = self.in_progress.number
 
     def make_url(self):
-        return "https://ticha.haverford.edu/en/texts/{}/{}/original".format(
-            self.text, self.in_progress.page
-        )
+        url_text = self.text.replace("_", "-")
+        return f"https://ticha.haverford.edu/en/texts/{url_text}/{self.in_progress.page}/original"
 
 
 def generate_outline(path, opath, *, text):
