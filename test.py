@@ -54,6 +54,8 @@ class TestGenerateHTML(unittest.TestCase):
 
 
 class TestGenerateOutline(unittest.TestCase):
+    # Show long diffs
+    maxDiff = None
 
     def test_outline(self):
 
