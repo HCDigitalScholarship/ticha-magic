@@ -4,7 +4,7 @@ Tools for manipulating TEI-encoded documents on the [Ticha](https://ticha.haverf
 
 ## Background
 
-The `ticha_magic` library can
+The `ticha-magic` library can
   - Convert a TEI-encoded XML file into HTML.
   - Make an HTML outline out of a TEI document.
   - Insert linguistic annotations from [FLEx](https://software.sil.org/fieldworks/) into an HTML document.
@@ -33,7 +33,7 @@ To install `ticha-magic` on your machine:
 ### The CLI
 
 ```
-usage: tei_to_html.py [-h] -t {levanto_arte,levanto_catechismo,cordova_arte} [-d] infile
+usage: tei_to_html.py [-h] -t {levanto-arte,levanto-catechismo,cordova-arte} [-d] infile
 
 Convert a TEI-encoded text to HTML.
 
@@ -42,8 +42,8 @@ positional arguments:
 
 optional arguments:
   -h, --help            show this help message and exit
-  -t, --text {levanto_arte,levanto_catechismo,cordova_arte}
                         which text's formatting to use when converting
+  -t, --text {levanto-arte,levanto-catechismo,cordova-arte}
   -d, --debug           print debugging output
 ```
 
@@ -52,9 +52,9 @@ optional arguments:
 For a file `example.xml`, one of the commands
 
 ```shell
-$ ./tei_to_html.py example.xml -t cordova_arte
-$ ./tei_to_html.py example.xml -t levanto_arte
-$ ./tei_to_html.py example.xml -t levanto_catechismo
+$ ./tei_to_html.py example.xml -t cordova-arte
+$ ./tei_to_html.py example.xml -t levanto-arte
+$ ./tei_to_html.py example.xml -t levanto-catechismo
 ```
 
 generates:
@@ -82,10 +82,10 @@ To publish an updated TEI-encoded document to Ticha:
 
 1. Use Atom's linter to check that there are no errors in your XML. [Instructions in the `ticha-xml-tei` repo](https://github.com/HCDigitalScholarship/ticha-xml-tei#linting).
 2. Navigate to the `ticha-magic` project directory
-3. Run `./tei_to_html.py path/to/your/file.xml -t document_name` (following CLI documentation above) to generate HTML from your XML file.
+3. Run `./tei_to_html.py path/to/your/file.xml -t document-name` (following CLI documentation above) to generate HTML from your XML file.
 4. In the Ticha admin interface, click "Import an HTML transcription" under "COMMON TASKS".
 5. Select the document you're updating from the drop-down.
-6. Use the three file selectors to upload the `document_name.html`, `document_name_reg.html`, and `document_name_outline.html` files you generated in their respective spots.
+6. Use the three file selectors to upload the `text-id.html`, `text-id_reg.html`, and `text-id_outline.html` files you generated in their respective spots.
 7. Click "Submit"! If there are errors in the file, a red banner will appear. If everything went well, a green banner will appear.
 8. Go check the text and outline pages to make sure everything worked. If it did, admire your handiwork! If it didn't, get in touch with Mike.
 

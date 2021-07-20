@@ -46,15 +46,15 @@ PREVIEW_TEMPLATE = """\
 
 
 TEXT_PARAMS = {
-    "levanto_arte": {
+    "levanto-arte": {
         "xslt_path": "xslt/levanto_arte.xslt",
         "flex_path": ""
     },
-    "levanto_catechismo": {
+    "levanto-catechismo": {
         "xslt_path": "xslt/base.xslt",
         "flex_path": ""
     },
-    "cordova_arte": {
+    "cordova-arte": {
         "xslt_path": "xslt/arte.xslt",
         "flex_path": "flex_export.json"
     }
@@ -329,8 +329,7 @@ class OutlineBuilder(ET.TreeBuilder):
             self.number = self.in_progress.number
 
     def make_url(self):
-        url_text = self.text.replace("_", "-")
-        return f"https://ticha.haverford.edu/en/texts/{url_text}/{self.in_progress.page}/original"
+        return f"https://ticha.haverford.edu/en/texts/{self.text}/{self.in_progress.page}/original"
 
 
 def generate_outline(path, opath, *, text):

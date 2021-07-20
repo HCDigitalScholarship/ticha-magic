@@ -17,7 +17,7 @@ class TestGenerateHTML(unittest.TestCase):
             tei_root,
             xslt_path=xslt_path,
             flex_path=flex_path,
-            text="levanto_arte",
+            text="levanto-arte",
             spellchoice=SPELLCHOICE_ORIG,
             abbrchoice=ABBRCHOICE_ABBR
         )
@@ -40,7 +40,7 @@ class TestGenerateHTML(unittest.TestCase):
             tei_root,
             xslt_path=xslt_path,
             flex_path=flex_path,
-            text="levanto_arte",
+            text="levanto-arte",
             spellchoice=SPELLCHOICE_SPANISH,
             abbrchoice=ABBRCHOICE_ABBR
         )
@@ -59,7 +59,7 @@ class TestGenerateOutline(unittest.TestCase):
 
     def test_outline(self):
 
-        text = "levanto_arte"
+        text = "levanto-arte"
         path = "./tests/input.xml"
 
         with open(path, "r", encoding="utf-8") as f:

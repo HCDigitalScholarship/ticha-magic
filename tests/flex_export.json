@@ -1,7 +1,7 @@
 {
   "pichina": [
     {
-      "section": "levanto_arte1",
+      "section": "levanto-arte1",
       "flex": {
         "en_gloss": "deer",
         "morphs": ["pichina"],
@@ -10,7 +10,7 @@
       }
     },
     {
-      "section": "levanto_arte2",
+      "section": "levanto-arte2",
       "flex": {
         "en_gloss": "also deer",
         "morphs": ["pichina"],
