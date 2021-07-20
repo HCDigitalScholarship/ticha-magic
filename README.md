@@ -33,7 +33,7 @@ To install `ticha-magic` on your machine:
 ### The CLI
 
 ```
-usage: tei_to_html.py [-h] -t {levanto-arte,levanto-catechismo,cordova-arte} [-d] infile
+usage: tei_to_html.py [-h] -t {levanto-arte,levanto-cathecismo,cordova-arte} [-d] infile
 
 Convert a TEI-encoded text to HTML.
 
@@ -42,7 +42,7 @@ positional arguments:
 
 optional arguments:
   -h, --help            show this help message and exit
-  -t, --text {levanto-arte,levanto-catechismo,cordova-arte}
+  -t, --text {levanto-arte,levanto-cathecismo,cordova-arte}
                         text ID indicating what formatting to use when converting
   -d, --debug           print debugging output
 ```
@@ -54,7 +54,7 @@ For a file `example.xml`, one of the commands
 ```shell
 $ ./tei_to_html.py example.xml -t cordova-arte
 $ ./tei_to_html.py example.xml -t levanto-arte
-$ ./tei_to_html.py example.xml -t levanto-catechismo
+$ ./tei_to_html.py example.xml -t levanto-cathecismo
 ```
 
 generates:

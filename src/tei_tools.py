@@ -50,7 +50,7 @@ TEXT_PARAMS = {
         "xslt_path": "xslt/levanto_arte.xslt",
         "flex_path": ""
     },
-    "levanto-catechismo": {
+    "levanto-cathecismo": {
         "xslt_path": "xslt/base.xslt",
         "flex_path": ""
     },
