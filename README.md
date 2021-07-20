@@ -42,8 +42,8 @@ positional arguments:
 
 optional arguments:
   -h, --help            show this help message and exit
-                        which text's formatting to use when converting
   -t, --text {levanto-arte,levanto-catechismo,cordova-arte}
+                        text ID indicating what formatting to use when converting
   -d, --debug           print debugging output
 ```
 

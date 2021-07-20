@@ -45,7 +45,7 @@ parser.add_argument(
     "--text",
     required=True,
     choices=list(TEXT_PARAMS.keys()),
-    help="which text's formatting to use when converting"
+    help="text ID indicating what formatting to use when converting"
 )
 parser.add_argument(
     "-d",
