@@ -233,7 +233,7 @@ def outline_tag_eq(tag, tagname):
     constant string with no namespace prefix, e.g. 'div'.
     """
     return tag == tagname or any(
-        tag == "{%s}%s" % (ns, tagname) for ns in KNOWN_NAMESPACES
+        tag == f"{{{ns}}}{tagname}" for ns in KNOWN_NAMESPACES
     )
 
 
@@ -245,7 +245,7 @@ def find_attr(attrs, attrname):
     """
     for key in attrs:
         if key == attrname or any(
-            key == "{%s}%s" % (ns, attrname) for ns in KNOWN_NAMESPACES
+            key == f"{{{ns}}}{attrname}" for ns in KNOWN_NAMESPACES
         ):
             return attrs[key]
     return None
