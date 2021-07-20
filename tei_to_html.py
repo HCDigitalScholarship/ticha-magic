@@ -42,7 +42,7 @@ parser = argparse.ArgumentParser(description="Convert a TEI-encoded text to HTML
 parser.add_argument("infile", help="path to a TEI file to convert")
 parser.add_argument(
     "-t",
-    "-text",
+    "--text",
     required=True,
     choices=list(TEXT_PARAMS.keys()),
     help="which text's formatting to use when converting"
@@ -66,12 +66,12 @@ if __name__ == "__main__":
 
     logging.debug("Started!")
 
-    if args.t in TEXT_PARAMS:
-        xslt_path = TEXT_PARAMS[args.t]["xslt_path"]
-        flex_path = TEXT_PARAMS[args.t]["flex_path"]
+    if args.text in TEXT_PARAMS:
+        xslt_path = TEXT_PARAMS[args.text]["xslt_path"]
+        flex_path = TEXT_PARAMS[args.text]["flex_path"]
     else:
-        raise RuntimeError("unknown text name: " + args.t)
+        raise RuntimeError("unknown text name: " + args.text)
 
-    make_all_files(args.infile, args.t, xslt_path, flex_path)
+    make_all_files(args.infile, args.text, xslt_path, flex_path)
 
     logging.debug("Finished!")
