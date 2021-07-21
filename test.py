@@ -11,7 +11,7 @@ class TestGenerateHTML(unittest.TestCase):
 
         tei_root = parse_xml_file('./tests/input.xml')
         xslt_path = "./xslt/test.xslt"
-        flex_path = "./tests/flex_export.json"
+        flex_path = "./tests/test_flex_export.json"
 
         html_root = generate_html(
             tei_root,
@@ -34,7 +34,7 @@ class TestGenerateHTML(unittest.TestCase):
 
         tei_root = parse_xml_file('./tests/input.xml')
         xslt_path = "./xslt/test.xslt"
-        flex_path = "./tests/flex_export.json"
+        flex_path = "./tests/test_flex_export.json"
 
         html_root = generate_html(
             tei_root,

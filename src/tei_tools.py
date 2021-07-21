@@ -47,16 +47,16 @@ PREVIEW_TEMPLATE = """\
 
 TEXT_PARAMS = {
     "levanto-arte": {
-        "xslt_path": "xslt/levanto_arte.xslt",
+        "xslt_path": "xslt/levanto-arte.xslt",
         "flex_path": ""
     },
     "levanto-cathecismo": {
-        "xslt_path": "xslt/base.xslt",
+        "xslt_path": "xslt/levanto-cathecismo.xslt",
         "flex_path": ""
     },
     "cordova-arte": {
-        "xslt_path": "xslt/arte.xslt",
-        "flex_path": "flex_export.json"
+        "xslt_path": "xslt/cordova-arte.xslt",
+        "flex_path": "cordova-arte_flex_export.json"
     }
 }
 
