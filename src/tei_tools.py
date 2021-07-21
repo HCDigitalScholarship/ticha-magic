@@ -267,9 +267,12 @@ class OutlineBuilder(ET.TreeBuilder):
         super().start("div", {"class": "index"})
         super().start("ul")
 
+    # What to do in the case of different tags
     def start(self, tag, attrs):
+        # Increase page count on <pb/>
         if outline_tag_eq(tag, "pb") and find_attr(attrs, "type") != "pdf":
             self.page += 1
+        # Start section on <div xml:id="text-idX.X.X">
         elif outline_tag_eq(tag, "div"):
             for key, value in attrs.items():
                 if key.endswith("id"):
@@ -281,8 +284,12 @@ class OutlineBuilder(ET.TreeBuilder):
                         break
                     else:
                         logging.warning(f'Found a <div> with the "id" attribute, but the start of its value didn\'t match the current text ID like I expected!\nLocation: page {self.page}, section {".".join(self.number)}\nValue of "id" attribute: "{value}"\nCurrent text ID: "{self.text}"')
+        # Gather up the title of the section from all content inside <head type="outline">
         elif outline_tag_eq(tag, "head") and find_attr(attrs, "type") == "outline":
+            # we're inside a head tag with outline type, so start collecting up
+            # the title to put in the outline
             self.get_title = True
+        # Warn about <choice> tags found inside <head type="outline">
         elif outline_tag_eq(tag, "choice"):
             if self.get_title:
                 logging.warning(f'Found a <choice> tag inside a <head> with type="outline"! This may cause strange results in the finished outline!\nLocation: page {self.page}, section {".".join(self.number)}')
