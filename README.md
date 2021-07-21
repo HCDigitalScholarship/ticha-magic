@@ -70,6 +70,14 @@ Each document is encoded differently and requires different features of TEI. The
 
 ### Insert linguistic annotations from FLEx into an HTML document.
 
+If a FLEx-to-JSON export for a text exists, and it's specified for that text in the TEXT_PARAMS list in [`tei_tools`](src/tei_tools.py), then the above steps will also insert linguistic annotations into the document.
+
+### Create JSON export from a FLEx XML file
+
+FieldWorks Language Explorer (FLEx) exports linguistic annotation data in XML. `ticha-magic`'s linguistic annotation inserter accepts a more compact and simple JSON representation of the same data. [`flexml_to_json.py`](src/flexml_to_json.py) converts FLEx's XML output to the format `ticha-magic` understands. The resulting JSON file can be used as the FLEx-to-JSON export in the above step.
+
+To create a JSON export of a FLEx XML file:
+
 *FIXME*
 
 
