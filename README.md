@@ -66,7 +66,7 @@ generates:
 
 (Preview files open nicely in a browser and make it convenient to check that the output was what you expected.)
 
-*FIXME: Since each document is different, the `-t` option takes an argument specifying the document being converted. Newly encoded documents require a modification to ticha-magic before they can be converted.*
+Each document is encoded differently and requires different features of TEI. The `-t` option takes an argument specifying the document being converted. Newly encoded documents require [a modification to `ticha-magic`](https://github.com/HCDigitalScholarship/ticha-magic#adding-support-for-a-new-document) before it will work to convert them.
 
 ### Insert linguistic annotations from FLEx into an HTML document.
 
@@ -117,3 +117,20 @@ python3 test.py
 ```
 
 The expected HTML outputs of the conversion are in the `tests` subdirectory. The test script runs conversion on `input.xml` and compares to these expected outputs. If you change the way something works, update tests to pass.
+
+### Adding support for a new document
+
+To add support for conversion of a new document:
+
+1. Add a new XSLT file in the [`xslt` directory](xslt/), modeled off of [`levanto_arte.xslt`](xslt/levanto_arte.xslt). It should import [`base.xslt`](xslt/base.xslt).
+
+2. Add a new entry to `TEXT_PARAMS` in [`tei_tools.py`](tei_tools.py). It should look like:
+
+    ```python
+    "your-text-id": {
+        "xslt_path": "xslt/your-text-id.xslt",
+        "flex_path": "optional_flex_export.json"
+    }
+    ```
+
+3. Update the documentation to include the new `-t` flag option you just added!
