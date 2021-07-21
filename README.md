@@ -124,7 +124,7 @@ To add support for conversion of a new document:
 
 1. Add a new XSLT file in the [`xslt` directory](xslt/), modeled off of [`levanto_arte.xslt`](xslt/levanto_arte.xslt). It should import [`base.xslt`](xslt/base.xslt).
 
-2. Add a new entry to `TEXT_PARAMS` in [`tei_tools.py`](tei_tools.py). It should look like:
+2. Add a new entry to `TEXT_PARAMS` in [`tei_tools.py`](src/tei_tools.py). It should look like:
 
     ```python
     "your-text-id": {
