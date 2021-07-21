@@ -303,6 +303,7 @@ class OutlineBuilder(ET.TreeBuilder):
             if self.in_progress:
                 new_title = self.in_progress.title + data
                 self.in_progress = self.in_progress._replace(title=new_title)
+                # Match Section titles starting with numbers and periods (ex: "1.2.9.1 Nominativo")
                 if re.match("\s*[0-9.]+ .*", new_title):
                     logging.warning(f'Found a <head> with type="outline" whose content looks like it starts with a section number. Since section numbers are added automatically by the Outline Builder, this might look like a duplicated section number in the finished outline!\nLocation: page {self.page}, section {".".join(self.number)}\nContent: "{new_title}"')
 
