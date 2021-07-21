@@ -280,7 +280,7 @@ class OutlineBuilder(ET.TreeBuilder):
                         self.in_progress = Section(number, "", str(self.page))
                         break
                     else:
-                        logging.warning(f'Found a <div> with the "id" attribute, but the start of its value didn\'t match the current text ID like I expected!\nValue of "id" attribute: "{value}"\nCurrent text ID: "{self.text}"')
+                        logging.warning(f'Found a <div> with the "id" attribute, but the start of its value didn\'t match the current text ID like I expected!\nLocation: page {self.page}, section {".".join(self.number)}\nValue of "id" attribute: "{value}"\nCurrent text ID: "{self.text}"')
         elif outline_tag_eq(tag, "head") and find_attr(attrs, "type") == "outline":
             self.get_title = True
         elif outline_tag_eq(tag, "choice"):
@@ -297,7 +297,7 @@ class OutlineBuilder(ET.TreeBuilder):
                 new_title = self.in_progress.title + data
                 self.in_progress = self.in_progress._replace(title=new_title)
                 if re.match("\s*[0-9.]+ .*", new_title):
-                    logging.warning(f'Found a <head> with type="outline" whose content looks like it starts with a section number. Since section numbers are added automatically by the Outline Builder, this might look like a duplicated section number in the finished outline!\nContent: "{new_title}"')
+                    logging.warning(f'Found a <head> with type="outline" whose content looks like it starts with a section number. Since section numbers are added automatically by the Outline Builder, this might look like a duplicated section number in the finished outline!\nLocation: page {self.page}, section {".".join(self.number)}\nContent: "{new_title}"')
 
     def close(self):
         self.write_section()
