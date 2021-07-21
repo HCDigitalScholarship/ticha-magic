@@ -283,6 +283,9 @@ class OutlineBuilder(ET.TreeBuilder):
                         logging.warning(f'Found a <div> with the "id" attribute, but the start of its value didn\'t match the current text ID like I expected!\nValue of "id" attribute: "{value}"\nCurrent text ID: "{self.text}"')
         elif outline_tag_eq(tag, "head") and find_attr(attrs, "type") == "outline":
             self.get_title = True
+        elif outline_tag_eq(tag, "choice"):
+            if self.get_title:
+                logging.warning(f'Found a <choice> tag inside a <head> with type="outline"! This may cause strange results in the finished outline!\nLocation: page {self.page}, section {".".join(self.number)}')
 
     def end(self, tag):
         if outline_tag_eq(tag, "head"):
