@@ -342,7 +342,7 @@ class OutlineBuilder(ET.TreeBuilder):
             self.number = self.in_progress.number
 
     def make_url(self):
-        return f"https://ticha.haverford.edu/en/texts/{self.text}/{self.in_progress.page}/original"
+        return f"/en/texts/{self.text}/{self.in_progress.page}/original"
 
     def report_location(self):
         return f'Location: page {self.page}, section {".".join(self.in_progress.number)}'
