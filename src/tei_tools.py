@@ -283,7 +283,7 @@ class OutlineBuilder(ET.TreeBuilder):
                         self.in_progress = Section(number, "", str(self.page))
                         break
                     else:
-                        logging.warning(f'Found a <div> with the "id" attribute, but the start of its value didn\'t match the current text ID like I expected!\nLocation: page {self.page}, section {".".join(self.number)}\nValue of "id" attribute: "{value}"\nCurrent text ID: "{self.text}"')
+                        logging.warning(f'Found a <div> with the "id" attribute, but the start of its value didn\'t match the current text ID like I expected!\n{self.report_location()}\nValue of "id" attribute: "{value}"\nCurrent text ID: "{self.text}"')
         # Gather up the title of the section from all content inside <head type="outline">
         elif outline_tag_eq(tag, "head") and find_attr(attrs, "type") == "outline":
             # we're inside a head tag with outline type, so start collecting up
@@ -292,7 +292,7 @@ class OutlineBuilder(ET.TreeBuilder):
         # Warn about <choice> tags found inside <head type="outline">
         elif outline_tag_eq(tag, "choice"):
             if self.get_title:
-                logging.warning(f'Found a <choice> tag inside a <head> with type="outline"! This may cause strange results in the finished outline!\nLocation: page {self.page}, section {".".join(self.number)}')
+                logging.warning(f'Found a <choice> tag inside a <head> with type="outline"! This may cause strange results in the finished outline!\n{self.report_location()}')
 
     def end(self, tag):
         if outline_tag_eq(tag, "head"):
@@ -303,9 +303,6 @@ class OutlineBuilder(ET.TreeBuilder):
             if self.in_progress:
                 new_title = self.in_progress.title + data
                 self.in_progress = self.in_progress._replace(title=new_title)
-                # Match Section titles starting with numbers and periods (ex: "1.2.9.1 Nominativo")
-                if re.match("\s*[0-9.]+ .*", new_title):
-                    logging.warning(f'Found a <head> with type="outline" whose content looks like it starts with a section number. Since section numbers are added automatically by the Outline Builder, this might look like a duplicated section number in the finished outline!\nLocation: page {self.page}, section {".".join(self.number)}\nContent: "{new_title}"')
 
     def close(self):
         self.write_section()
@@ -333,9 +330,12 @@ class OutlineBuilder(ET.TreeBuilder):
                 super().start("ul", {"id": "section" + ".".join(self.number)})
             super().start("li")
             super().start("a", {"href": self.make_url()})
-            # i.e., 1.3.1 Licencia
+            # Warn if title starts with a section number
+            if re.match("\s*([0-9]+\.)*[0-9]+ +.*", self.in_progress.title):
+                logging.warning(f'Found a <head> with type="outline" whose content looks like it starts with a section number. Since section numbers are added automatically by the Outline Builder, this might look like a duplicated section number in the finished outline!\n{self.report_location()}\nContent: "{self.in_progress.title}"')
             super().data(
                 ".".join(self.in_progress.number) + " " + self.in_progress.title
+                # i.e., 1.3.1 Licencia
             )
             super().end("a")
             super().end("li")
@@ -343,6 +343,9 @@ class OutlineBuilder(ET.TreeBuilder):
 
     def make_url(self):
         return f"https://ticha.haverford.edu/en/texts/{self.text}/{self.in_progress.page}/original"
+
+    def report_location(self):
+        return f'Location: page {self.page}, section {".".join(self.in_progress.number)}'
 
 
 def generate_outline(path, opath, *, text):
