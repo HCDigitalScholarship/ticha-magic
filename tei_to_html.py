@@ -35,7 +35,7 @@ def make_all_files(path, text, xslt_path, flex_path):
 
         # Write preview
         preview_htmlstr = TEXT_PREVIEW_TEMPLATE.format(htmlstr)
-        with open(f'previews/{suffix}.html', "w", encoding="utf-8") as f:
+        with open(f'previews/{suffix}_preview.html', "w", encoding="utf-8") as f:
             f.write(preview_htmlstr)
 
     # Generate outline
