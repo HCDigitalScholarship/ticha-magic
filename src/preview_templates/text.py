@@ -3,6 +3,7 @@ TEXT_PREVIEW_TEMPLATE = """\
 <html lang="en">
   <head>
     <meta charset="utf-8"/>
+    <title>ticha-magic Text Preview</title>
     <link
       rel="stylesheet"
       href="https://ticha.haverford.edu/static/zapotexts/css/page_detail_style.css"/>
