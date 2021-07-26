@@ -334,7 +334,7 @@ class OutlineBuilder(ET.TreeBuilder):
             if re.match("\s*([0-9]+\.)*[0-9]+ +.*", self.in_progress.title):
                 logging.warning(f'Found a <head> with type="outline" whose content looks like it starts with a section number. Since section numbers are added automatically by the Outline Builder, this might look like a duplicated section number in the finished outline!\n{self.report_location()}\nContent: "{self.in_progress.title}"')
             super().data(
-                ".".join(self.in_progress.number) + " " + self.in_progress.title
+                f'{".".join(self.in_progress.number)} {self.in_progress.title}'
                 # i.e., 1.3.1 Licencia
             )
             super().end("a")
