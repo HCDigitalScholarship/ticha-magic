@@ -9,11 +9,6 @@ __pycache__
 *.backup
 *.save
 
-/old
-
-# This is automatically created by the test runner.
-failed_output.html
-
 # Allow XML, HTML and JSON files in the test suite
 !tests/*.html
 !tests/*.xml
