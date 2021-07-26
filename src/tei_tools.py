@@ -296,7 +296,13 @@ class OutlineBuilder(ET.TreeBuilder):
                     super().start("li")
                     super().data(".".join(self.in_progress.number[i:]))
                     super().end("li")
-                super().start("ul", {"id": "section" + ".".join(self.number)})
+                # Start all sections except top-level ones collapsed
+                if len(self.number) == 1:
+                    super().start("ul", {"id": f'section{"_".join(self.number)}', "class": "collapse in"})
+                else:
+                    super().start("ul", {"id": f'section{"_".join(self.number)}', "class": "collapse", "style": "height: 0px"})
+
+
             super().start("li")
             super().start("a", {"href": self.make_url()})
             # Warn if title starts with a section number
@@ -307,6 +313,14 @@ class OutlineBuilder(ET.TreeBuilder):
                 # i.e., 1.3.1 Licencia
             )
             super().end("a")
+
+            # Generate a drop-down button for every outline item. We'll delete the ones that dont work later
+            target_section = f'section{"_".join(self.in_progress.number)}'
+            super().start("button", {"class": "collapsed", "data-toggle": "collapse", "data-target": f'#{target_section}'})
+            super().start("div", {"class": "caret"})
+            super().end("div")
+            super().end("button")
+
             super().end("li")
             self.number = self.in_progress.number
 
@@ -327,8 +341,17 @@ def generate_outline(path, output_path, *, text, preview):
     parser.feed(data)
     root = target.close()
 
-    with open(opath, "w", encoding="utf-8") as f:
-        f.write(ET.tostring(root, encoding="unicode"))
+    # Delete button elements that don't have a corresponding section
+    existing_sections = [ul.attrib['id'] for ul in root.findall('.//ul[@id]')]
+    parent_map = {c:p for p in root.iter() for c in p}
+    for button in root.findall('.//button'):
+        if button.attrib['data-target'][1:] not in existing_sections:
+            parent_map[button].remove(button)  # workaround for `button.getparent().remove(button)` using parent_map definition above
+
+    with open(output_path, "w", encoding="utf-8") as f:
+        htmlstr = ET.tostring(root, encoding="unicode")
+        output = OUTLINE_PREVIEW_TEMPLATE.format(htmlstr) if preview else htmlstr
+        f.write(output)
 
 
 def generate_html(tei_root, *, xslt_path, flex_path, text, spellchoice, abbrchoice):
