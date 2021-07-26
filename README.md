@@ -60,9 +60,8 @@ $ ./tei_to_html.py example.xml -t levanto-cathecismo
 generates:
 * An HTML outline
 * An original HTML file
-  * (Plus a preview file for the above)
 * A regularized HTML file
-  * (Plus a preview file for the above)
+* A preview file for each of these
 
 (Preview files open nicely in a browser and make it convenient to check that the output was what you expected.)
 
@@ -91,11 +90,12 @@ To publish an updated TEI-encoded document to Ticha:
 1. Use Atom's linter to check that there are no errors in your XML. [Instructions in the `ticha-xml-tei` repo](https://github.com/HCDigitalScholarship/ticha-xml-tei#linting).
 2. Navigate to the `ticha-magic` project directory
 3. Run `./tei_to_html.py path/to/your/file.xml -t document-name` (following CLI documentation above) to generate HTML from your XML file.
-4. In the Ticha admin interface, click "Import an HTML transcription" under "COMMON TASKS".
-5. Select the document you're updating from the drop-down.
-6. Use the three file selectors to upload the `text-id.html`, `text-id_reg.html`, and `text-id_outline.html` files you generated in their respective spots.
-7. Click "Submit"! If there are errors in the file, a red banner will appear. If everything went well, a green banner will appear.
-8. Go check the text and outline pages to make sure everything worked. If it did, admire your handiwork! If it didn't, get in touch with Mike.
+4. Check that the output looks sensible by opening the preview files that were generated in the `preview` directory.
+5. In the Ticha admin interface, click "Import an HTML transcription" under "COMMON TASKS".
+6. Select the document you're updating from the drop-down.
+7. Use the three file selectors to upload the `text-id.html`, `text-id_reg.html`, and `text-id_outline.html` files you generated in their respective spots.
+8. Click "Submit"! If there are errors in the file, a red banner will appear. If everything went well, a green banner will appear.
+9. Go check the text and outline pages to make sure everything worked. If it did, admire your handiwork! If it didn't, get in touch with Mike.
 
 
 ## Developing
