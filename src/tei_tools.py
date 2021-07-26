@@ -4,7 +4,7 @@ from lxml import etree, sax
 import logging
 from .flexify import flexify
 import re
-
+from .preview_templates import OUTLINE_PREVIEW_TEMPLATE
 
 # Possible settings for the <choice> tag in TEI.
 SPELLCHOICE_ORIG = "orig"
@@ -12,37 +12,6 @@ SPELLCHOICE_SPANISH = "reg-spanish"
 SPELLCHOICE_SPACING = "reg-spacing"
 ABBRCHOICE_ABBR = "abbr"
 ABBRCHOICE_EXPAN = "expan"
-
-
-PREVIEW_TEMPLATE = """\
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8"/>
-    <link
-      rel="stylesheet"
-      href="https://ticha.haverford.edu/static/zapotexts/css/page_detail_style.css"/>
-    <link
-      rel="stylesheet"
-      href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"/>
-    <script
-      type="text/javascript"
-      src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js">
-    </script>
-  </head>
-  <body>
-    <div class="container">
-      <div class="row text-left">
-        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
-        </div>
-        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
-          {}
-        </div>
-      </div>
-    </div>
-  </body>
-</html>
-"""
 
 
 TEXT_PARAMS = {
@@ -348,8 +317,8 @@ class OutlineBuilder(ET.TreeBuilder):
         return f'Location: page {self.page}, section {".".join(self.in_progress.number)}'
 
 
-def generate_outline(path, opath, *, text):
-    logging.debug(f"generating Outline for {text}")
+def generate_outline(path, output_path, *, text, preview):
+    logging.debug(f"generating{' Preview' if preview else ''} Outline for {text}")
     with open(path, "r", encoding="utf-8") as f:
         data = f.read()
 

@@ -4,9 +4,9 @@ from lxml import etree
 import logging
 import os
 
-from src import SPELLCHOICE_ORIG, SPELLCHOICE_SPANISH, ABBRCHOICE_ABBR, PREVIEW_TEMPLATE, TEXT_PARAMS
+from src import SPELLCHOICE_ORIG, SPELLCHOICE_SPANISH, ABBRCHOICE_ABBR, TEXT_PARAMS
+from src import TEXT_PREVIEW_TEMPLATE, OUTLINE_PREVIEW_TEMPLATE
 from src import parse_xml_file, generate_html, generate_outline
-
 
 def make_all_files(path, text, xslt_path, flex_path):
     files_to_generate = [
@@ -30,13 +30,18 @@ def make_all_files(path, text, xslt_path, flex_path):
 
         htmlstr = etree.tostring(html_root, method="xml", encoding="unicode")
         if preview:
-            htmlstr = PREVIEW_TEMPLATE.format(htmlstr)
+            htmlstr = TEXT_PREVIEW_TEMPLATE.format(htmlstr)
 
         output_filename = text + suffix + '.html'
+        if preview:
+            output_filename = 'preview/' + output_filename
         with open(output_filename, "w", encoding="utf-8") as f:
             f.write(htmlstr)
 
-    generate_outline(path, text + "_outline.html", text=text)
+    # Generate outline and preview outline
+    for preview in [False, True]:
+        output_path = f'preview/{text}_outline_preview.html' if preview else f'{text}_outline.html'
+        generate_outline(path, output_path, text=text, preview=preview)
 
 
 parser = argparse.ArgumentParser(description="Convert a TEI-encoded text to HTML.")
