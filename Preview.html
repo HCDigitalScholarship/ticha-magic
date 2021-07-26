@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta title="ticha-magic Previews">
+    <style>
+      html {
+        width: 100%;
+        height: 100%;
+      }
+      body {
+        height: auto;
+        font-family: "Open Sans", sans-serif;
+      }
+      iframe {
+        width: 85vw;
+        height: 80vh;
+        border: 2px #ac2a13 solid;
+      }
+      header {
+        margin-bottom: .5em;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <input type="radio" id="orig" name="page" value="previews/orig_preview.html" checked="checked">
+      <label for="orig">Original transcription</label>
+      <input type="radio" id="reg" name="page" value="previews/reg_preview.html">
+      <label for="reg">Regularized transcription</label>
+      <input type="radio" id="outline" name="page" value="previews/outline_preview.html">
+      <label for="outline">Outline</label>
+    </header>
+    <iframe id="page-frame" src="previews/orig_preview.html">
+      <p>Make sure iframes are supported in your browser</p>
+    </iframe>
+    <p>Showing previews of the last output from <code>tei_to_html.py</code>. Use the buttons above to choose which output file to preview</p>
+    <p>If the preview shows "File not found", make sure you've successfully run <code>tei_to_html.py</code> on a document.</p>
+
+    <script>
+      var radios = document.querySelectorAll('input[type=radio][name="page"]')
+      for (const radio of radios) {
+        radio.addEventListener('change', () => updateShown(radio.value))
+      }
+
+      function updateShown(page) {
+        document.getElementById('page-frame').src = page
+      }
+    </script>
+
+  </body>
+</html>

@@ -13,3 +13,6 @@ __pycache__
 !tests/*.html
 !tests/*.xml
 !tests/*.json
+
+# Allow previews file
+!Preview.html
