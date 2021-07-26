@@ -9,16 +9,16 @@ from src import TEXT_PREVIEW_TEMPLATE, OUTLINE_PREVIEW_TEMPLATE
 from src import parse_xml_file, generate_html, generate_outline
 
 def make_all_files(path, text, xslt_path, flex_path):
-    files_to_generate = [
-      # (suffix,         preview?,  regularized?)
-        ('orig',         False,     False),
-        ('reg',          False,     True),
-        ('orig_preview', True,      False),
-        ('reg_preview',  True,      True)
+    versions_to_generate = [
+      # (suffix, regularized?)
+        ('orig', False),
+        ('reg',  True)
     ]
 
-    for suffix, preview, regularized in files_to_generate:
-        tei_root = parse_xml_file(path)
+    tei_root = parse_xml_file(path)
+
+    # Generate HTML for each option from the XML
+    for suffix, regularized in versions_to_generate:
         html_root = generate_html(
             tei_root,
             xslt_path=xslt_path,
@@ -28,18 +28,21 @@ def make_all_files(path, text, xslt_path, flex_path):
             abbrchoice=ABBRCHOICE_ABBR,
         )
 
+        # Write output
         htmlstr = etree.tostring(html_root, method="xml", encoding="unicode")
-        if preview:
-            htmlstr = TEXT_PREVIEW_TEMPLATE.format(htmlstr)
-
-        output_path = f'previews/{suffix}.html' if preview else f'{text}_{suffix}.html'
-        with open(output_path, "w", encoding="utf-8") as f:
+        with open(f'{text}_{suffix}.html', "w", encoding="utf-8") as f:
             f.write(htmlstr)
 
-    # Generate outline and preview outline
-    for preview in [False, True]:
-        output_path = f'previews/outline_preview.html' if preview else f'{text}_outline.html'
-        generate_outline(path, output_path, text=text, preview=preview)
+        # Write preview
+        preview_htmlstr = TEXT_PREVIEW_TEMPLATE.format(htmlstr)
+        with open(f'previews/{suffix}.html', "w", encoding="utf-8") as f:
+            f.write(preview_htmlstr)
+
+    # Generate outline
+    generate_outline(path, f'{text}_outline.html', text=text, preview=False)
+
+    # Generate preview outline
+    generate_outline(path, 'previews/outline_preview.html', text=text, preview=True)
 
 
 parser = argparse.ArgumentParser(description="Convert a TEI-encoded text to HTML.")
