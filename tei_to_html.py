@@ -2,6 +2,7 @@
 import argparse
 from lxml import etree
 import logging
+import os
 
 from src import SPELLCHOICE_ORIG, SPELLCHOICE_SPANISH, ABBRCHOICE_ABBR, PREVIEW_TEMPLATE, TEXT_PARAMS
 from src import parse_xml_file, generate_html, generate_outline
@@ -64,7 +65,7 @@ if __name__ == "__main__":
     else:
         logging.basicConfig(level=logging.INFO)
 
-    logging.debug("Started!")
+    logging.info(f'Starting! converting TEI in {args.infile} to Ticha HTML')
 
     if args.text in TEXT_PARAMS:
         xslt_path = TEXT_PARAMS[args.text]["xslt_path"]
@@ -74,4 +75,4 @@ if __name__ == "__main__":
 
     make_all_files(args.infile, args.text, xslt_path, flex_path)
 
-    logging.debug("Finished!")
+    logging.info(f'Finished! Wrote 3 files to {os.getcwd()} and 3 preview files to {os.getcwd()}/preview')
