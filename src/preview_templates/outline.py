@@ -7,14 +7,14 @@ OUTLINE_PREVIEW_TEMPLATE = """\
     <meta name="description" content="">
     <meta name="author" content="">
     <title>ticha-magic Outline Preview</title>
-    <link rel="stylesheet" href="resources/bootstrap_journal.css"></style>
-    <link rel="stylesheet" href="resources/custom.css"></style>
+    <link rel="stylesheet" href="https://ticha.haverford.edu/static/css/bootstrap_journal.css"/>
+    <link rel="stylesheet" href="https://ticha.haverford.edu/static/css/custom.css"/>
   </head>
   <body>
     {}
 
-    <script src="resources/jquery-1.js"></script>
-    <script src="resources/bootstrap.js"></script>
+    <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+    <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.1.0/js/bootstrap.min.js"></script>
   </body>
 </html>
 """
