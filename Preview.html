@@ -13,16 +13,48 @@
         font-family: "Open Sans", sans-serif;
       }
       iframe {
-        width: 85vw;
-        height: 80vh;
+        width: 700px;
+        height: 85vh;
         border: 2px #ac2a13 solid;
       }
       header {
         margin-bottom: .5em;
       }
+      main {
+        display: grid;
+        column-gap: 15px;
+        row-gap: 0px;
+        flex-wrap: wrap;
+      }
+      section.page {
+        grid-column-start: 1;
+        grid-column-end: 2;
+      }
+      section.explainer {
+        min-width: 250px;
+        grid-column-start: 2;
+        grid-column-end: 3;
+      }
+      @media (max-width: 977px) {
+        section.page {
+          grid-column-start: 1;
+          grid-column-end: 3;
+        }
+        section.explainer {
+          min-width: unset;
+          grid-column-start: 1;
+          grid-column-end: 3;
+        }
+        iframe {
+          width: calc(100% - 8px);
+          height: 68vh;
+        }
+      }
+
     </style>
   </head>
   <body>
+    <h1>ticha-magic output Preview</h1>
     <header>
       <input type="radio" id="orig" name="page" value="previews/orig_preview.html" checked="checked">
       <label for="orig">Original transcription</label>
@@ -31,11 +63,16 @@
       <input type="radio" id="outline" name="page" value="previews/outline_preview.html">
       <label for="outline">Outline</label>
     </header>
-    <iframe id="page-frame" src="previews/orig_preview.html">
-      <p>Make sure iframes are supported in your browser</p>
-    </iframe>
-    <p>Showing previews of the last output from <code>tei_to_html.py</code>. Use the buttons above to choose which output file to preview</p>
-    <p>If the preview shows "File not found", make sure you've successfully run <code>tei_to_html.py</code> on a document.</p>
+    <main>
+      <section class="page">
+        <iframe id="page-frame" src="previews/orig_preview.html">
+          <p>Make sure iframes are supported in your browser</p>
+        </iframe>
+      </section>
+      <section class="explainer">
+        <p>Showing previews of the last output from <code>tei_to_html.py</code>. Use the buttons above to choose which output file to preview</p>
+        <p>If the preview shows "File not found", make sure you've successfully run <code>tei_to_html.py</code> on a document.</p>
+    </main>
 
     <script>
       var radios = document.querySelectorAll('input[type=radio][name="page"]')
