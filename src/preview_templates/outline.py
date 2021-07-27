@@ -14,7 +14,7 @@ OUTLINE_PREVIEW_TEMPLATE = """\
     {}
 
     <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
-    <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.1.0/js/bootstrap.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.1.0/js/bootstrap.min.js"></script>
   </body>
 </html>
 """
