@@ -4,14 +4,13 @@
   <xsl:param name="spellchoice" select="'orig'"/>
   <xsl:param name="abbrchoice" select="'abbr'"/>
 
-
-  <!-- transform <foreign xml:lang="cvz"> -->
+  <!-- Transform <foreign xml:lang="cvz"> so that we can do FLEx insertion. -->
   <xsl:template match="tei:foreign[@xml:lang='cvz']">
     <mark class="trigger">
       <xsl:apply-templates/>
     </mark>
   </xsl:template>
-  
+
   <xsl:template match="tei:foreign[@rend='italic']|tei:foreign[@rend='italics']">
     <mark class="trigger">
       <span class="italic">
