@@ -26,6 +26,10 @@ TEXT_PARAMS = {
     "cordova-arte": {
         "xslt_path": "xslt/cordova-arte.xslt",
         "flex_path": "cordova-arte_flex_export.json"
+    },
+    "aguero-miscelaneo": {
+        "xslt_path": "xslt/aguero-miscelaneo.xslt",
+        "flex_path": ""
     }
 }
 
