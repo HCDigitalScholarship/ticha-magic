@@ -332,7 +332,13 @@ class OutlineBuilder(ET.TreeBuilder):
         return f"/en/texts/{self.text}/{self.in_progress.page}/original"
 
     def report_location(self):
-        return f'Location: page {self.page}, section {".".join(self.in_progress.number)}'
+        page = f'page ~{self.page}'
+        if self.in_progress:
+            section = f'section {".".join(self.in_progress.number)}'
+            return f'Location: {page}, {section}'
+        else:
+            return f'Location: {page}'
+
 
 
 def generate_outline(path, output_path, *, text, preview):
