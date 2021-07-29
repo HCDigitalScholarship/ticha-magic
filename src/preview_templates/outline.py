@@ -9,6 +9,7 @@ OUTLINE_PREVIEW_TEMPLATE = """\
     <title>ticha-magic Outline Preview</title>
     <link rel="stylesheet" href="https://ticha.haverford.edu/static/css/bootstrap_journal.css"/>
     <link rel="stylesheet" href="https://ticha.haverford.edu/static/css/custom.css"/>
+    <link rel="stylesheet" href="https://ticha.haverford.edu/static/css/outline.css"/>
   </head>
   <body>
     {}
