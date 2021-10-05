@@ -30,6 +30,10 @@ TEXT_PARAMS = {
     "aguero-miscelaneo": {
         "xslt_path": "xslt/aguero-miscelaneo.xslt",
         "flex_path": ""
+    },
+    "Te744": {
+        "xslt_path": "xslt/Te744.xslt",
+        "flex_path": ""
     }
 }
 
