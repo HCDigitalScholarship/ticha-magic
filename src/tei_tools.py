@@ -34,6 +34,10 @@ TEXT_PARAMS = {
     "Te744": {
         "xslt_path": "xslt/Te744.xslt",
         "flex_path": ""
+    },
+    "Te744T": {
+        "xslt_path": "xslt/Te744T.xslt",
+        "flex_path": ""
     }
 }
 

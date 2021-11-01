@@ -42,7 +42,7 @@ positional arguments:
 
 optional arguments:
   -h, --help            show this help message and exit
-  -t, --text {levanto-arte,levanto-cathecismo,cordova-arte,aguero-miscelaneo}
+  -t, --text {levanto-arte,levanto-cathecismo,cordova-arte,aguero-miscelaneo,Te744,Te744T}
                         text ID indicating what formatting to use when converting
   -d, --debug           print debugging output
 ```
