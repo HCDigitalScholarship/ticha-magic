@@ -16,91 +16,12 @@
     </span>
   </xsl:template>
 
-  <!-- Transform <note> tags (add brackets and apply class) -->
+  <!-- Ignore <note> tags and their comments -->
   <xsl:template match="tei:note">
-    <span class="note">
-      {<xsl:apply-templates/>}
-    </span>
   </xsl:template>
 
-  <xsl:template match="tei:note[@place='margin left']">
-    <span class="note marginalia-margin-left">
-      {<xsl:apply-templates/>}
-    </span>
-  </xsl:template>
-
-  <xsl:template match="tei:note[@place='margin right']">
-    <span class="note marginalia-margin-right">
-      {<xsl:apply-templates/>}
-    </span>
-  </xsl:template>
-
-  <xsl:template match="tei:note[@place='above']">
-    <span class="note marginalia-above">
-      {<xsl:apply-templates/>}
-    </span>
-  </xsl:template>
-
-  <xsl:template match="tei:note[@place='below']">
-    <span class="note marginalia-below">
-      {<xsl:apply-templates/>}
-    </span>
-  </xsl:template>
-
-  <xsl:template match="tei:note[@place='top']">
-    <span class="note marginalia-top">
-      {<xsl:apply-templates/>}
-    </span>
-  </xsl:template>
-
-  <xsl:template match="tei:note[@place='bottom']">
-    <span class="note marginalia-bottom">
-      {<xsl:apply-templates/>}
-    </span>
-  </xsl:template>
-
-  <!-- Transform <add> tags (add brackets and apply class) -->
+  <!-- Ignore <add> tags and their comments -->
   <xsl:template match="tei:add">
-    <span class="add">
-      {<xsl:apply-templates/>}
-    </span>
   </xsl:template>
-
-  <xsl:template match="tei:add[@place='margin left']">
-    <span class="add marginalia-margin-left">
-      {<xsl:apply-templates/>}
-    </span>
-  </xsl:template>
-
-  <xsl:template match="tei:add[@place='margin right']">
-    <span class="add marginalia-margin-right">
-      {<xsl:apply-templates/>}
-    </span>
-  </xsl:template>
-
-  <xsl:template match="tei:add[@place='above']">
-    <span class="add marginalia-above">
-      {<xsl:apply-templates/>}
-    </span>
-  </xsl:template>
-
-  <xsl:template match="tei:add[@place='below']">
-    <span class="add marginalia-below">
-      {<xsl:apply-templates/>}
-    </span>
-  </xsl:template>
-
-  <xsl:template match="tei:add[@place='top']">
-    <span class="add marginalia-top">
-      {<xsl:apply-templates/>}
-    </span>
-  </xsl:template>
-
-  <xsl:template match="tei:add[@place='bottom']">
-    <span class="add marginalia-bottom">
-      {<xsl:apply-templates/>}
-    </span>
-  </xsl:template>
-
 
 </xsl:stylesheet>
