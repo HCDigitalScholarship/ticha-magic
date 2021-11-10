@@ -16,4 +16,12 @@
     </span>
   </xsl:template>
 
+<<<<<<< HEAD
+=======
+  <!-- Transform <br/> -->
+  <xsl:template match="tei:br">
+    <br/>
+  </xsl:template>
+
+>>>>>>> 8c92dc1867f2937aa07b5bd2cf9d52380fa7ba05
 </xsl:stylesheet>

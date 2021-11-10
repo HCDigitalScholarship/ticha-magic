@@ -16,4 +16,12 @@
     </span>
   </xsl:template>
 
+  <!-- Ignore <note> tags and their comments -->
+  <xsl:template match="tei:note">
+  </xsl:template>
+
+  <!-- Ignore <add> tags and their comments -->
+  <xsl:template match="tei:add">
+  </xsl:template>
+
 </xsl:stylesheet>
