@@ -56,6 +56,7 @@ $ ./tei_to_html.py example.xml -t cordova-arte
 $ ./tei_to_html.py example.xml -t levanto-arte
 $ ./tei_to_html.py example.xml -t levanto-cathecismo
 $ ./tei_to_html.py example.xml -t Te744
+$ ./tei_to_html.py example.xml -t Te744T
 ```
 
 generates:
